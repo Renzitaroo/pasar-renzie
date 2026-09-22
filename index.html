@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Identity Services (GIS) SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <!-- HEADER & NAVIGATION -->
@@ -28,11 +30,62 @@
         <i class="fas fa-house"></i>
         <span>Beranda</span>
       </button>
-      <button class="nav-link" data-target="shop" id="nav-shop">
+      <button class="nav-link" data-target="shop" id="nav-shop" style="display: none;">
         <i class="fas fa-basket-shopping"></i>
         <span>Toko Buah & Sayur</span>
       </button>
     </nav>
+
+    <!-- USER AUTH CONTROLS -->
+    <div class="header-auth" id="header-auth">
+      <!-- State Belum Login -->
+      <div class="auth-guest" id="auth-guest">
+        <button class="btn-google-login" id="btn-open-login" title="Masuk Akun Google">
+          <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Masuk Akun</span>
+        </button>
+      </div>
+
+      <!-- State Sudah Login -->
+      <div class="auth-user" id="auth-user" style="display: none;">
+        <button class="user-chip" id="user-chip-btn" aria-haspopup="true" aria-expanded="false">
+          <img class="user-avatar" id="user-avatar-img" src="" alt="Avatar">
+          <div class="user-chip-info">
+            <span class="user-chip-name" id="user-chip-name">Pelanggan</span>
+            <span class="user-chip-badge"><i class="fas fa-check-circle"></i> Member</span>
+          </div>
+          <i class="fas fa-chevron-down user-chip-arrow"></i>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="user-dropdown-menu" id="user-dropdown-menu">
+          <div class="dropdown-header">
+            <div class="dropdown-user-name" id="menu-user-name">Nama Pelanggan</div>
+            <div class="dropdown-user-email" id="menu-user-email">email@example.com</div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="menu-btn-profile">
+            <i class="fas fa-user-pen"></i>
+            <span>Data Diri & Alamat</span>
+          </button>
+          <button class="dropdown-item" id="menu-btn-orders">
+            <i class="fas fa-receipt"></i>
+            <span>Riwayat Pesanan</span>
+            <span class="menu-order-count" id="menu-order-badge">0</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item dropdown-logout" id="menu-btn-logout">
+            <i class="fas fa-right-from-bracket"></i>
+            <span>Keluar Akun</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- ============================================================
@@ -265,38 +318,250 @@
 
   <!-- MODAL REVIEW CHECKOUT -->
   <div class="modal-overlay" id="review-modal" role="dialog" aria-modal="true">
-    <div class="modal-card">
+    <div class="modal-card checkout-modal-card">
       <div class="modal-header">
         <div class="modal-badge"><i class="fas fa-receipt"></i> Langkah Terakhir</div>
         <h3>Cek Pesanan Kamu</h3>
-        <p class="modal-sub">Periksa kembali detail pesanan sebelum dikirim ke petani mitra.</p>
+        <p class="modal-sub">Periksa kembali detail pesanan, data pengiriman, dan metode pembayaran.</p>
         <button class="modal-close-btn" id="modal-close-btn" title="Tutup"><i class="fas fa-times"></i></button>
       </div>
 
       <div class="modal-body">
+        <!-- CUSTOMER / RECIPIENT INFO SECTION -->
+        <div class="checkout-section-block">
+          <div class="checkout-block-title">
+            <i class="fas fa-user-circle"></i>
+            <span>Informasi Penerima & Pengiriman</span>
+          </div>
+
+          <!-- Banner Login jika belum login -->
+          <div class="checkout-auth-banner" id="checkout-auth-banner">
+            <div class="auth-banner-left">
+              <svg class="google-icon-sm" viewBox="0 0 24 24" width="16" height="16">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <div>
+                <strong>Sudah punya akun Google?</strong>
+                <p>Masuk untuk isi otomatis alamat & lacak pesanan.</p>
+              </div>
+            </div>
+            <button type="button" class="btn-banner-login" id="btn-checkout-login">Masuk Akun</button>
+          </div>
+
+          <!-- Customer Logged In Tag -->
+          <div class="checkout-logged-user" id="checkout-logged-user" style="display: none;">
+            <img id="checkout-user-avatar" src="" alt="Avatar" class="checkout-user-avatar">
+            <div class="checkout-user-meta">
+              <span class="checkout-user-label">Pemesanan atas nama:</span>
+              <strong id="checkout-user-name">Nama Pelanggan</strong>
+              <span id="checkout-user-email">email@domain.com</span>
+            </div>
+            <button type="button" class="btn-link-edit" id="btn-edit-profile-quick" title="Edit Profil & Alamat"><i class="fas fa-pen-to-square"></i> Ubah</button>
+          </div>
+
+          <!-- Recipient Fields -->
+          <div class="checkout-form-grid">
+            <div class="field-group">
+              <label class="field-label" for="checkout-name"><i class="fas fa-user"></i> Nama Lengkap <span class="required">*</span></label>
+              <input type="text" id="checkout-name" class="input-text" placeholder="Nama penerima paket" required>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="checkout-phone"><i class="fab fa-whatsapp"></i> No. WhatsApp / HP <span class="required">*</span></label>
+              <input type="tel" id="checkout-phone" class="input-text" placeholder="mis. 081234567890" required>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="checkout-address"><i class="fas fa-location-dot"></i> Alamat Lengkap Pengiriman <span class="required">*</span></label>
+            <textarea id="checkout-address" class="input-textarea" rows="2" placeholder="Nama Jalan, Nomor Rumah, RT/RW, Patokan khusus..." required></textarea>
+          </div>
+        </div>
+
+        <!-- ITEMS IN CART -->
         <div class="review-items-title">Daftar Pesanan (Buah & Sayur)</div>
         <div id="review-items" class="review-items"></div>
         
         <div id="review-note-wrap"></div>
 
+        <!-- PAYMENT METHOD SELECTION -->
         <div class="payment-method-wrap">
           <label class="field-label"><i class="fas fa-wallet"></i> Metode Pembayaran</label>
           <div class="payment-options">
-            <label class="payment-option active">
+            <label class="payment-option active" data-payment="qris">
               <input type="radio" name="payment-method" value="qris" checked>
               <i class="fas fa-qrcode"></i>
               <span>QRIS Instan</span>
             </label>
-            <label class="payment-option">
-              <input type="radio" name="payment-method" value="cod">
-              <i class="fas fa-hand-holding-dollar"></i>
-              <span>Bayar di Tempat (COD)</span>
-            </label>
-            <label class="payment-option">
+            <label class="payment-option" data-payment="transfer">
               <input type="radio" name="payment-method" value="transfer">
               <i class="fas fa-building-columns"></i>
               <span>Transfer Bank</span>
             </label>
+            <label class="payment-option" data-payment="cod">
+              <input type="radio" name="payment-method" value="cod">
+              <i class="fas fa-hand-holding-dollar"></i>
+              <span>Bayar di Tempat (COD)</span>
+            </label>
+          </div>
+
+          <!-- DYNAMIC PAYMENT DETAILS PANEL -->
+          <div class="payment-panel-container">
+            <!-- PANEL QRIS -->
+            <div class="payment-panel active" id="panel-qris">
+              <div class="qris-card">
+                <div class="qris-header">
+                  <div class="qris-brand">
+                    <span class="qris-tag">QRIS</span>
+                    <span class="qris-aspi">PEMBAYARAN NASIONAL</span>
+                  </div>
+                  <div class="qris-merchant-badge">
+                    <i class="fas fa-store"></i> Pasar Pagi Segar
+                  </div>
+                </div>
+                
+                <div class="qris-qr-wrapper">
+                  <div class="qris-qr-box" id="qris-qr-display">
+                    <svg class="qris-svg" viewBox="0 0 200 200" width="140" height="140">
+                      <rect width="200" height="200" fill="#ffffff" rx="10"/>
+                      <!-- QR Finder Corners -->
+                      <rect x="15" y="15" width="45" height="45" fill="#1b2413" rx="4"/>
+                      <rect x="22" y="22" width="31" height="31" fill="#ffffff" rx="2"/>
+                      <rect x="27" y="27" width="21" height="21" fill="#4f633f" rx="2"/>
+
+                      <rect x="140" y="15" width="45" height="45" fill="#1b2413" rx="4"/>
+                      <rect x="147" y="22" width="31" height="31" fill="#ffffff" rx="2"/>
+                      <rect x="152" y="27" width="21" height="21" fill="#4f633f" rx="2"/>
+
+                      <rect x="15" y="140" width="45" height="45" fill="#1b2413" rx="4"/>
+                      <rect x="22" y="147" width="31" height="31" fill="#ffffff" rx="2"/>
+                      <rect x="27" y="152" width="21" height="21" fill="#4f633f" rx="2"/>
+
+                      <!-- QR Pattern Elements -->
+                      <circle cx="75" cy="25" r="4.5" fill="#2b2015"/>
+                      <circle cx="95" cy="25" r="4.5" fill="#2b2015"/>
+                      <circle cx="115" cy="25" r="4.5" fill="#2b2015"/>
+                      <circle cx="75" cy="45" r="4.5" fill="#4f633f"/>
+                      <circle cx="115" cy="45" r="4.5" fill="#4f633f"/>
+                      <circle cx="85" cy="65" r="4.5" fill="#2b2015"/>
+                      <circle cx="105" cy="65" r="4.5" fill="#2b2015"/>
+                      <circle cx="125" cy="65" r="4.5" fill="#2b2015"/>
+
+                      <circle cx="25" cy="75" r="4.5" fill="#2b2015"/>
+                      <circle cx="45" cy="75" r="4.5" fill="#2b2015"/>
+                      <circle cx="25" cy="95" r="4.5" fill="#4f633f"/>
+                      <circle cx="45" cy="115" r="4.5" fill="#2b2015"/>
+
+                      <circle cx="155" cy="75" r="4.5" fill="#2b2015"/>
+                      <circle cx="175" cy="95" r="4.5" fill="#2b2015"/>
+                      <circle cx="155" cy="115" r="4.5" fill="#4f633f"/>
+
+                      <!-- Center Logo Badge -->
+                      <rect x="78" y="78" width="44" height="44" rx="8" fill="#4f633f"/>
+                      <text x="100" y="107" font-family="sans-serif" font-size="22" text-anchor="middle">🍎</text>
+
+                      <!-- Bottom Elements -->
+                      <circle cx="75" cy="135" r="4.5" fill="#2b2015"/>
+                      <circle cx="95" cy="135" r="4.5" fill="#2b2015"/>
+                      <circle cx="115" cy="135" r="4.5" fill="#4f633f"/>
+                      <circle cx="85" cy="155" r="4.5" fill="#4f633f"/>
+                      <circle cx="125" cy="155" r="4.5" fill="#2b2015"/>
+                      <circle cx="145" cy="155" r="4.5" fill="#2b2015"/>
+                      <circle cx="75" cy="175" r="4.5" fill="#2b2015"/>
+                      <circle cx="115" cy="175" r="4.5" fill="#2b2015"/>
+                      <circle cx="165" cy="175" r="4.5" fill="#4f633f"/>
+                    </svg>
+                  </div>
+                  <div class="qris-info">
+                    <div class="qris-countdown">
+                      <i class="fas fa-stopwatch"></i> Berlaku dalam: <strong id="qris-timer">15:00</strong>
+                    </div>
+                    <div class="qris-amount-box">
+                      <span>Total Tagihan:</span>
+                      <strong id="qris-total-amount">Rp 0</strong>
+                    </div>
+                    <p class="qris-guide-text">
+                      Scan kode QR di atas menggunakan aplikasi <strong>GoPay, OVO, ShopeePay, DANA, BCA, Mandiri, BRI</strong>, dll.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL TRANSFER BANK -->
+            <div class="payment-panel" id="panel-transfer">
+              <div class="bank-transfer-card">
+                <div class="bank-selector-row">
+                  <button type="button" class="bank-chip active" data-bank="bca">
+                    <i class="fas fa-building-columns"></i> BCA
+                  </button>
+                  <button type="button" class="bank-chip" data-bank="mandiri">
+                    <i class="fas fa-building-columns"></i> Mandiri
+                  </button>
+                  <button type="button" class="bank-chip" data-bank="bri">
+                    <i class="fas fa-building-columns"></i> BRI
+                  </button>
+                  <button type="button" class="bank-chip" data-bank="bni">
+                    <i class="fas fa-building-columns"></i> BNI
+                  </button>
+                </div>
+
+                <div class="bank-account-box">
+                  <div class="bank-account-header">
+                    <span class="bank-name-label" id="selected-bank-name">Bank Central Asia (BCA)</span>
+                    <span class="bank-badge">Verifikasi Cepat</span>
+                  </div>
+                  <div class="bank-account-number-row">
+                    <div class="bank-number" id="selected-bank-number">8801 0812 3456 7890</div>
+                    <button type="button" class="btn-copy-acc" id="btn-copy-account" title="Salin Nomor Rekening">
+                      <i class="fas fa-copy"></i>
+                      <span>Salin</span>
+                    </button>
+                  </div>
+                  <div class="bank-holder-info">
+                    Atas Nama: <strong>PT PASAR PAGI SEGAR INDONESIA</strong>
+                  </div>
+                </div>
+
+                <div class="transfer-steps-box">
+                  <h6><i class="fas fa-circle-info"></i> Petunjuk Pembayaran:</h6>
+                  <ol>
+                    <li>Buka aplikasi m-Banking atau kunjungi ATM terdekat.</li>
+                    <li>Pilih menu <strong>Transfer Antar Rekening</strong>.</li>
+                    <li>Salin nomor rekening di atas dan masukkan nominal yang sesuai.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL COD -->
+            <div class="payment-panel" id="panel-cod">
+              <div class="cod-card">
+                <div class="cod-badge-banner">
+                  <i class="fas fa-hand-holding-dollar"></i>
+                  <div>
+                    <strong>Bayar Tunai di Tempat (COD)</strong>
+                    <p>Bayar langsung secara tunai saat kurir Pasar Pagi tiba di alamat tujuan.</p>
+                  </div>
+                </div>
+
+                <div class="cod-perks">
+                  <div class="cod-perk">
+                    <i class="fas fa-shield-halved"></i>
+                    <span><strong>Garansi Segar:</strong> Periksa buah dan sayur di hadapan kurir sebelum membayar.</span>
+                  </div>
+                  <div class="cod-perk">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span><strong>Uang Pas:</strong> Siapkan uang pas sesuai total belanja untuk mempermudah transaksi.</span>
+                  </div>
+                  <div class="cod-perk">
+                    <i class="fas fa-truck-clock"></i>
+                    <span><strong>Jadwal Pengantaran:</strong> Tiba di rumah Anda antara pukul 08:30 - 10:30 WIB.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -313,6 +578,274 @@
     </div>
   </div>
 
+  <!-- MODAL LOGIN GOOGLE & AKUN CUSTOMER -->
+  <div class="modal-overlay" id="login-modal" role="dialog" aria-modal="true">
+    <div class="modal-card login-card">
+      <div class="modal-header">
+        <div class="modal-badge"><i class="fab fa-google"></i> Masuk Akun Customer</div>
+        <h3>Selamat Datang di Pasar Pagi</h3>
+        <p class="modal-sub">Masuk dengan akun Google untuk kemudahan pelacakan pesanan, alamat otomatis, dan promo petani.</p>
+        <button class="modal-close-btn" id="login-modal-close" title="Tutup"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="login-body">
+        <!-- Google Sign-In Section -->
+        <div class="google-auth-section" id="google-auth-section">
+          <!-- Tombol Akun Google Utama Pengguna (Guntur Rizqi) -->
+          <button type="button" class="btn-google-account-primary" id="btn-login-guntur" title="Masuk langsung dengan akun Google Guntur Rizqi">
+            <div class="google-btn-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+            </div>
+            <div class="google-btn-text-wrap">
+              <span class="google-btn-action">Lanjutkan sebagai Guntur Rizqi</span>
+              <span class="google-btn-email">gunturrizqi444@gmail.com</span>
+            </div>
+            <i class="fas fa-check-circle google-btn-verified"></i>
+          </button>
+
+          <!-- Kontainer GIS SDK Asli (Disediakan jika VITE_GOOGLE_CLIENT_ID terpasang) -->
+          <div class="google-gis-real-wrapper" id="google-gis-real-wrapper" style="display: none;">
+            <div id="google-gis-button-target"></div>
+          </div>
+
+          <!-- Pilihan Masuk Akun Google Lainnya -->
+          <div class="custom-google-box">
+            <button type="button" class="btn-toggle-custom-google" id="btn-toggle-custom-google">
+              <i class="fab fa-google"></i> Masuk dengan Akun Google Lain <i class="fas fa-chevron-down" id="toggle-custom-google-icon"></i>
+            </button>
+            <form class="custom-google-form" id="custom-google-form" style="display: none;">
+              <input type="text" class="custom-google-input" id="custom-google-name" placeholder="Nama Lengkap (cth. Guntur Rizqi)" required>
+              <input type="email" class="custom-google-input" id="custom-google-email" placeholder="Alamat Gmail (cth. nama@gmail.com)" required>
+              <button type="submit" class="btn-submit-custom-google">
+                <i class="fas fa-right-to-bracket"></i> Masuk dengan Akun Ini
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="login-divider-text">
+          <span>atau uji coba instan (Mode Demo Cepat)</span>
+        </div>
+
+        <div class="demo-login-box">
+          <p class="demo-login-tip">Pilih profil pelanggan simulasi untuk mencoba fitur akun langsung:</p>
+          <div class="demo-user-cards">
+            <button class="demo-user-btn" data-demo-name="Budi Santoso" data-demo-email="budi.santoso@gmail.com" data-demo-phone="081234567890" data-demo-address="Jl. Melati No. 12, Pamulang Barat, Tangerang Selatan">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" alt="Budi" class="demo-avatar">
+              <div class="demo-user-info">
+                <strong>Budi Santoso</strong>
+                <span>budi.santoso@gmail.com</span>
+              </div>
+              <i class="fas fa-arrow-right"></i>
+            </button>
+            <button class="demo-user-btn" data-demo-name="Siti Rahma" data-demo-email="siti.rahma@gmail.com" data-demo-phone="085712345678" data-demo-address="Kompleks Griya Asri Blok C4 No. 8, Ciputat, Tangerang Selatan">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80" alt="Siti" class="demo-avatar">
+              <div class="demo-user-info">
+                <strong>Siti Rahma</strong>
+                <span>siti.rahma@gmail.com</span>
+              </div>
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="login-env-hint">
+          <i class="fas fa-circle-info"></i>
+          <span>Pengembang: Untuk mengaktifkan Google Sign-In asli, cantumkan <code>VITE_GOOGLE_CLIENT_ID</code> di file <code>.env</code> Anda.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PEMBUATAN PROFIL BARU (ONBOARDING PROFILE SETUP) -->
+  <div class="modal-overlay" id="profile-setup-modal" role="dialog" aria-modal="true">
+    <div class="modal-card profile-setup-card">
+      <div class="modal-header">
+        <div class="modal-badge"><i class="fas fa-sparkles"></i> Profil Pasar Pagi</div>
+        <h3>Selamat Datang di Pasar Pagi! 🌿</h3>
+        <p class="modal-sub">Lengkapi profilmu agar kami bisa menyiapkan petikan buah & sayuran segar terbaik untukmu.</p>
+        <button class="modal-close-btn" id="profile-setup-close" title="Tutup"><i class="fas fa-times"></i></button>
+      </div>
+
+      <form id="profile-setup-form" class="profile-setup-form">
+        <!-- 4. PEMILIHAN ICON PROFILE LUCU & PREVIEW -->
+        <div class="field-group">
+          <label class="field-label">
+            <i class="fas fa-icons"></i> Pilih Icon Karakter Lucu Kamu <span class="required">*</span>
+          </label>
+          <p class="field-note">Pilih satu karakter buah / sayur ceria favoritmu:</p>
+          
+          <div class="setup-avatar-preview-box">
+            <div class="setup-avatar-big-wrap" id="setup-avatar-preview-circle">
+              <span class="setup-avatar-emoji" id="setup-avatar-preview-emoji">🍎</span>
+              <img class="setup-avatar-img" id="setup-avatar-preview-img" src="" alt="Avatar" style="display: none;">
+            </div>
+            <div class="setup-avatar-meta">
+              <strong id="setup-avatar-preview-name">Si Apel Riang</strong>
+              <span id="setup-avatar-preview-sub">Karakter Pasar Pagi kamu</span>
+            </div>
+          </div>
+
+          <div class="cute-avatar-grid" id="setup-cute-avatar-grid">
+            <!-- Dirender secara dinamis oleh JavaScript -->
+          </div>
+        </div>
+
+        <!-- 1. PENGISIAN NAMA & 2. UMUR -->
+        <div class="form-row-2col">
+          <div class="field-group">
+            <label class="field-label" for="setup-name">
+              <i class="fas fa-user"></i> 1. Nama Lengkap <span class="required">*</span>
+            </label>
+            <input type="text" id="setup-name" class="input-text" placeholder="Nama Anda" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setup-age">
+              <i class="fas fa-cake-candles"></i> 2. Umur (Tahun) <span class="required">*</span>
+            </label>
+            <input type="number" id="setup-age" class="input-text" placeholder="mis. 24" min="5" max="120" required>
+          </div>
+        </div>
+
+        <!-- 3. SAYURAN ATAU BUAH YANG DISUKAI -->
+        <div class="field-group">
+          <label class="field-label">
+            <i class="fas fa-heart"></i> 3. Buah atau Sayuran yang Kamu Sukai <span class="required">*</span>
+          </label>
+          <p class="field-note">Pilih satu atau lebih buah & sayur kesukaanmu:</p>
+          <div class="produce-chips-grid" id="setup-fav-produce-chips">
+            <!-- Dirender secara dinamis oleh JavaScript -->
+          </div>
+        </div>
+
+        <!-- ALAMAT & KONTAK TAMBAHAN (OPSIONAL) -->
+        <div class="form-row-2col">
+          <div class="field-group">
+            <label class="field-label" for="setup-phone">
+              <i class="fab fa-whatsapp"></i> Nomor WhatsApp <span class="field-optional">(opsional)</span>
+            </label>
+            <input type="tel" id="setup-phone" class="input-text" placeholder="mis. 081234567890">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setup-address">
+              <i class="fas fa-location-dot"></i> Alamat Pengantaran <span class="field-optional">(opsional)</span>
+            </label>
+            <input type="text" id="setup-address" class="input-text" placeholder="Kompleks, Jalan, Kota...">
+          </div>
+        </div>
+
+        <div class="modal-actions setup-actions">
+          <button type="submit" class="btn-confirm btn-setup-submit" id="btn-setup-submit">
+            <span>✨ Selesaikan Profil & Buka Toko Buah</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL PROFIL & ALAMAT CUSTOMER -->
+  <div class="modal-overlay" id="profile-modal" role="dialog" aria-modal="true">
+    <div class="modal-card profile-edit-card">
+      <div class="modal-header">
+        <div class="modal-badge"><i class="fas fa-user-gear"></i> Profil Pelanggan</div>
+        <h3>Informasi Akun Kamu</h3>
+        <p class="modal-sub">Data ini digunakan saat Anda berbelanja dan checkout di Pasar Pagi.</p>
+        <button class="modal-close-btn" id="profile-modal-close" title="Tutup"><i class="fas fa-times"></i></button>
+      </div>
+
+      <form id="profile-form" class="profile-form">
+        <div class="profile-avatar-row">
+          <div class="profile-avatar-circle" id="profile-avatar-display-circle">
+            <span class="profile-avatar-emoji" id="profile-modal-emoji">🍎</span>
+            <img class="profile-big-avatar" id="profile-modal-avatar" src="" alt="Avatar" style="display: none;">
+          </div>
+          <div class="profile-account-meta">
+            <h4 id="profile-modal-name">Nama Pelanggan</h4>
+            <p id="profile-modal-email">email@domain.com</p>
+            <div class="profile-badges-row">
+              <span class="profile-verified-tag"><i class="fab fa-google"></i> Terverifikasi</span>
+              <span class="profile-char-tag" id="profile-char-tag">🍎 Si Apel Riang</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PILIHAN GANTI ICON KARAKTER -->
+        <div class="field-group">
+          <label class="field-label"><i class="fas fa-icons"></i> Ganti Icon Karakter Kamu</label>
+          <div class="cute-avatar-grid cute-avatar-grid-sm" id="profile-cute-avatar-grid">
+            <!-- Dirender secara dinamis -->
+          </div>
+        </div>
+
+        <div class="form-row-2col">
+          <div class="field-group">
+            <label class="field-label" for="profile-name">
+              <i class="fas fa-user"></i> Nama Lengkap <span class="required">*</span>
+            </label>
+            <input type="text" id="profile-name" class="input-text" placeholder="Nama Anda" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="profile-age">
+              <i class="fas fa-cake-candles"></i> Umur (Tahun) <span class="required">*</span>
+            </label>
+            <input type="number" id="profile-age" class="input-text" placeholder="mis. 24" min="5" max="120" required>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label"><i class="fas fa-heart"></i> Buah atau Sayuran Kesukaan</label>
+          <div class="produce-chips-grid" id="profile-fav-produce-chips">
+            <!-- Dirender secara dinamis -->
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="profile-wa">
+            <i class="fab fa-whatsapp"></i> Nomor WhatsApp / Telepon <span class="required">*</span>
+          </label>
+          <input type="tel" id="profile-wa" class="input-text" placeholder="mis. 081234567890" required>
+          <span class="field-hint">Digunakan kurir untuk konfirmasi pengantaran buah segar.</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="profile-address">
+            <i class="fas fa-location-dot"></i> Alamat Pengiriman Lengkap <span class="required">*</span>
+          </label>
+          <textarea id="profile-address" class="input-textarea" rows="2" placeholder="Nama Jalan, Nomor Rumah, RT/RW, Patokan..." required></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-back" id="profile-modal-cancel">Batal</button>
+          <button type="submit" class="btn-confirm">
+            <i class="fas fa-save"></i> Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL RIWAYAT PESANAN -->
+  <div class="modal-overlay" id="orders-modal" role="dialog" aria-modal="true">
+    <div class="modal-card orders-modal-card">
+      <div class="modal-header">
+        <div class="modal-badge"><i class="fas fa-receipt"></i> Histori Belanja</div>
+        <h3>Riwayat Pesanan</h3>
+        <p class="modal-sub">Daftar transaksi belanja buah dan sayuran segar Anda di Pasar Pagi.</p>
+        <button class="modal-close-btn" id="orders-modal-close" title="Tutup"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="orders-body" id="orders-list-container">
+        <!-- Dinamis dirender oleh JavaScript -->
+      </div>
+    </div>
+  </div>
+
   <!-- ORDER SUCCESS MODAL -->
   <div class="modal-overlay" id="success-modal" role="dialog" aria-modal="true">
     <div class="modal-card success-card">
@@ -324,9 +857,14 @@
 
       <div class="order-receipt-card" id="order-receipt-content"></div>
 
-      <button class="btn-confirm success-close-btn" id="success-close-btn">
-        <i class="fas fa-basket-shopping"></i> Belanja Lagi
-      </button>
+      <div class="success-actions-row">
+        <button class="btn-back" id="success-view-orders-btn">
+          <i class="fas fa-receipt"></i> Lihat Riwayat Pesanan
+        </button>
+        <button class="btn-confirm success-close-btn" id="success-close-btn">
+          <i class="fas fa-basket-shopping"></i> Belanja Lagi
+        </button>
+      </div>
     </div>
   </div>
 

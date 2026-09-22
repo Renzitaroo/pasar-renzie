@@ -436,11 +436,227 @@ document.addEventListener("DOMContentLoaded", () => {
   const mobileCartItems = document.getElementById("mobile-cart-items");
   const mobileCartTotal = document.getElementById("mobile-cart-total");
 
+  // ============================================================
+  //  STATE: AUTENTIKASI CUSTOMER & RIWAYAT PESANAN
+  // ============================================================
+  let currentUser = JSON.parse(localStorage.getItem("pasar_pagi_user") || "null");
+  let customerOrders = JSON.parse(localStorage.getItem("pasar_pagi_orders") || "[]");
+
+  // DOM References untuk Akun Customer & Modals
+  const loginModal = document.getElementById("login-modal");
+  const profileSetupModal = document.getElementById("profile-setup-modal");
+  const profileModal = document.getElementById("profile-modal");
+  const ordersModal = document.getElementById("orders-modal");
+  const userDropdownMenu = document.getElementById("user-dropdown-menu");
+  const userChipBtn = document.getElementById("user-chip-btn");
+
+  // ============================================================
+  //  12 MASKOT KARAKTER BUAH & SAYUR LUCU (PASAR PAGI THEME)
+  // ============================================================
+  const CUTE_AVATARS = [
+    { id: "apel", name: "Si Apel Riang", emoji: "🍎", bg: "#fde8e8", sub: "Ceria, manis & renyah alami" },
+    { id: "alpukat", name: "Si Alpukat Gemoy", emoji: "🥑", bg: "#eaf6ea", sub: "Lembut, sehat & kaya nutrisi" },
+    { id: "stroberi", name: "Si Stroberi Manis", emoji: "🍓", bg: "#fce7f3", sub: "Imut beraroma segar fajar" },
+    { id: "wortel", name: "Si Wortel Ceria", emoji: "🥕", bg: "#ffedd5", sub: "Segar bugar & penuh vitamin" },
+    { id: "pisang", name: "Si Pisang Santai", emoji: "🍌", bg: "#fef9c3", sub: "Hangat, santai & penuh energi" },
+    { id: "bayam", name: "Si Bayam Kuat", emoji: "🥬", bg: "#dcfce7", sub: "Kuat, hijau & kaya zat besi" },
+    { id: "jeruk", name: "Si Jeruk Segar", emoji: "🍊", bg: "#ffedd5", sub: "Pemberi semangat pagi hari" },
+    { id: "brokoli", name: "Si Brokoli Imut", emoji: "🥦", bg: "#dcfce7", sub: "Kribo lucu sahabat sehat" },
+    { id: "jagung", name: "Si Jagung Manis", emoji: "🌽", bg: "#fef9c3", sub: "Manis legit panen ladang" },
+    { id: "anggur", name: "Si Anggur Cantik", emoji: "🍇", bg: "#f3e8ff", sub: "Elegan, manis & berkelas" },
+    { id: "jamur", name: "Si Jamur Petualang", emoji: "🍄", bg: "#fee2e2", sub: "Kecil petualang rimba sejuk" },
+    { id: "matahari", name: "Si Bunga Kebun", emoji: "🌻", bg: "#fef9c3", sub: "Mekar menyambut embun pagi" }
+  ];
+
+  // Pilihan Buah & Sayur Kesukaan
+  const FAVORITE_PRODUCE_LIST = [
+    { id: "apel", label: "Apel Manis", icon: "🍎" },
+    { id: "stroberi", label: "Stroberi Fajar", icon: "🍓" },
+    { id: "alpukat", label: "Alpukat Mentega", icon: "🥑" },
+    { id: "pisang", label: "Pisang Raja", icon: "🍌" },
+    { id: "jeruk", label: "Jeruk Segar", icon: "🍊" },
+    { id: "mangga", label: "Mangga Arumanis", icon: "🥭" },
+    { id: "bayam", label: "Bayam Hijau", icon: "🥬" },
+    { id: "brokoli", label: "Brokoli Kebun", icon: "🥦" },
+    { id: "wortel", label: "Wortel Renyah", icon: "🥕" },
+    { id: "jagung", label: "Jagung Manis", icon: "🌽" },
+    { id: "tomat", label: "Tomat Ceri", icon: "🍅" },
+    { id: "anggur", label: "Anggur Manis", icon: "🍇" }
+  ];
+
+  let setupSelectedAvatar = CUTE_AVATARS[0];
+  let setupSelectedProduces = new Set(["apel", "wortel"]);
+  let editSelectedAvatar = null;
+  let editSelectedProduces = new Set();
+
+  function getAvatarDataUri(emoji, bg = "#eaf6ea") {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="${bg}" stroke="#677d6a" stroke-width="2.5"/><text x="50" y="68" font-size="52" text-anchor="middle">${emoji}</text></svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  }
+
+  // ============================================================
+  //  STATE: METODE PEMBAYARAN LENGKAP (QRIS, BANK, COD)
+  // ============================================================
+  const BANK_ACCOUNTS = {
+    bca: {
+      name: "Bank Central Asia (BCA)",
+      code: "BCA",
+      number: "8801 0812 3456 7890",
+      rawNumber: "8801081234567890",
+      holder: "PT PASAR PAGI SEGAR INDONESIA"
+    },
+    mandiri: {
+      name: "Bank Mandiri",
+      code: "Mandiri",
+      number: "8902 0812 3456 7890",
+      rawNumber: "8902081234567890",
+      holder: "PT PASAR PAGI SEGAR INDONESIA"
+    },
+    bri: {
+      name: "Bank Rakyat Indonesia (BRI)",
+      code: "BRI",
+      number: "8805 0812 3456 7890",
+      rawNumber: "8805081234567890",
+      holder: "PT PASAR PAGI SEGAR INDONESIA"
+    },
+    bni: {
+      name: "Bank Negara Indonesia (BNI)",
+      code: "BNI",
+      number: "8808 0812 3456 7890",
+      rawNumber: "8808081234567890",
+      holder: "PT PASAR PAGI SEGAR INDONESIA"
+    }
+  };
+  let selectedBank = "bca";
+  let activePaymentMethod = "qris";
+  let qrisTimerInterval = null;
+  let qrisSecondsLeft = 15 * 60;
+
+  // ============================================================
+  // MANDIRI PRIVATE GATEWAY (MPG) - QRIS DINAMIS 0% MDR
+  // ============================================================
+  const MPG_CONFIG = {
+    backendUrl: "http://localhost:3001/api/checkout",
+    directGatewayUrl: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_MPG_GATEWAY_URL) || "https://paymentgateway.daeroom.my.id",
+    apiKey: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_MPG_API_KEY) || ""
+  };
+
+  /**
+   * Terbitkan Invoice Mandiri Private Gateway (MPG)
+   * Mengutamakan backend local proxy (/api/checkout), dengan fallback langsung ke API Gateway jika backend tidak aktif.
+   */
+  async function requestMpgInvoice({ orderId, amount, customerName, customerEmail, customerPhone, items }) {
+    const payload = {
+      order_id: orderId,
+      amount: Math.round(amount),
+      customer_name: customerName || "Pelanggan Pasar Pagi",
+      customer_email: customerEmail || "pelanggan@pasarpagi.id",
+      customer_phone: customerPhone || "081234567890",
+      redirect_url: window.location.origin,
+      items: (items || []).map(i => ({
+        name: `${i.name || "Item"} (${i.weightLabel || "1kg"})`,
+        price: Math.round(i.price || 0),
+        quantity: i.count || 1
+      }))
+    };
+
+    // 1. Coba lewat backend server lokal (port 3001) jika aktif (timeout 1000ms)
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000);
+
+      const res = await fetch(MPG_CONFIG.backendUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const json = await res.json();
+        const data = json.data || json;
+        const checkoutUrl = data.checkout_url || json.checkout_url;
+        if (json.success && checkoutUrl) {
+          return {
+            success: true,
+            invoiceId: data.id || data.invoice_id || json.invoice_id,
+            checkoutUrl: checkoutUrl,
+            qrString: data.qr_string || data.qris_string || json.qr_string,
+            uniqueCode: data.unique_code ?? json.unique_code ?? 0,
+            totalAmount: data.amount || data.total_amount || json.total_amount || amount
+          };
+        }
+      }
+    } catch (e) {
+      // Backend lokal offline, lanjutkan otomatis ke gateway resmi
+    }
+
+    // 2. Panggil Gateway API langsung
+    // Menggunakan header Authorization: Bearer yang diizinkan penuh oleh CORS preflight browser
+    try {
+      const directUrl = `${MPG_CONFIG.directGatewayUrl}/api/v1/invoice`;
+      const res = await fetch(directUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${MPG_CONFIG.apiKey}`
+        },
+        body: JSON.stringify({
+          order_id: payload.order_id,
+          amount: payload.amount,
+          customer_name: payload.customer_name,
+          customer_email: payload.customer_email,
+          customer_phone: payload.customer_phone,
+          items: payload.items
+        })
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || json.error || `Gateway returned HTTP ${res.status}`);
+      }
+
+      const data = json.data || json;
+      const checkoutUrl = data.checkout_url || json.checkout_url;
+      if (!checkoutUrl) {
+        throw new Error("Gateway tidak mengembalikan checkout_url.");
+      }
+
+      return {
+        success: true,
+        invoiceId: data.id || data.invoice_id || json.invoice_id,
+        checkoutUrl: checkoutUrl,
+        qrString: data.qr_string || data.qris_string || json.qr_string,
+        uniqueCode: data.unique_code ?? json.unique_code ?? 0,
+        totalAmount: data.amount || data.total_amount || json.total_amount || amount,
+        status: data.status || json.status || "PENDING"
+      };
+    } catch (err) {
+      console.error("[MPG] Direct invoice creation error:", err);
+      throw err;
+    }
+  }
+
   /* ============================================================
      NAVIGASI MULTI-HALAMAN (SPA ROUTER)
      ============================================================ */
 
   function navigateTo(targetPage, scrollTarget = null) {
+    // Gatekeeper: Halaman Toko hanya terbuka jika sudah login Google & profil selesai
+    if (targetPage === "shop") {
+      if (!currentUser) {
+        openLoginModal();
+        showToast("Silakan masuk dengan akun Google untuk membuka Toko Buah & Sayur!");
+        return;
+      }
+      if (!currentUser.profileCompleted) {
+        openProfileSetupModal();
+        showToast("Lengkapi profil Pasar Pagi kamu untuk mulai berbelanja!");
+        return;
+      }
+    }
+
     currentPage = targetPage;
 
     if (targetPage === "shop") {
@@ -500,7 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="saving-badge">-${formatMoney(sums.potongan)}</span>
         </div>` : ""}
       <div class="row grand">
-        <span>Total Pembayaran</span>
+        <span class="grand-total-label">Total Pembayaran</span>
         <span class="grand-total-val">${formatMoney(sums.total)}</span>
       </div>
     `;
@@ -679,7 +895,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateCartCount() {
     const totalCount = Object.values(cart).reduce((sum, item) => sum + item.count, 0);
     const totalKg = Math.round(Object.values(cart).reduce((sum, item) => sum + (item.weightKg * item.count), 0) * 10) / 10;
-    if (cartCountEl) cartCountEl.textContent = totalCount;
+
     if (sidebarCartBadgeEl) sidebarCartBadgeEl.textContent = `${totalCount} item (${totalKg} kg)`;
     if (mobileCartItems) mobileCartItems.textContent = `${totalCount} item (${totalKg} kg)`;
 
@@ -688,18 +904,28 @@ document.addEventListener("DOMContentLoaded", () => {
       subtotal += item.count * item.price;
     });
     const breakdown = buildBreakdown(subtotal);
-    if (headerCartTotalEl) headerCartTotalEl.textContent = formatMoney(breakdown.total);
     if (mobileCartTotal) mobileCartTotal.textContent = formatMoney(breakdown.total);
 
+    // Tombol checkout aktif setiap kali ada item di keranjang
+    if (checkoutBtn) {
+      if (totalCount > 0) {
+        checkoutBtn.removeAttribute("disabled");
+        checkoutBtn.disabled = false;
+        checkoutBtn.classList.remove("disabled");
+      } else {
+        checkoutBtn.setAttribute("disabled", "true");
+        checkoutBtn.disabled = true;
+        checkoutBtn.classList.add("disabled");
+      }
+    }
+
     // Floating cart bar di mobile
-    if (totalCount > 0 && currentPage === "shop") {
-      mobileCartBar.classList.add("visible");
-      checkoutBtn.removeAttribute("disabled");
-      checkoutBtn.classList.remove("disabled");
-    } else {
-      mobileCartBar.classList.remove("visible");
-      checkoutBtn.setAttribute("disabled", "true");
-      checkoutBtn.classList.add("disabled");
+    if (mobileCartBar) {
+      if (totalCount > 0 && currentPage === "shop") {
+        mobileCartBar.classList.add("visible");
+      } else {
+        mobileCartBar.classList.remove("visible");
+      }
     }
   }
 
@@ -797,6 +1023,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* TAMBAH BARANG KE KERANJANG BERDASARKAN TAKARAN */
   function addToCart(productId, customWeight = null) {
+    if (!currentUser) {
+      openLoginModal();
+      showToast("Silakan masuk dengan akun Google untuk mulai berbelanja!");
+      return;
+    }
+    if (!currentUser.profileCompleted) {
+      openProfileSetupModal();
+      showToast("Lengkapi profil Pasar Pagi kamu untuk mulai berbelanja!");
+      return;
+    }
+
     const product = products.find((item) => item.id == productId);
     if (!product) return;
 
@@ -884,6 +1121,563 @@ document.addEventListener("DOMContentLoaded", () => {
     toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
   }
 
+  /* ============================================================
+     FUNGSI-FUNGSI AUTENTIKASI GOOGLE & AKUN CUSTOMER
+     ============================================================ */
+
+  function initGoogleAuth() {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    const realGisWrapper = document.getElementById("google-gis-real-wrapper");
+    const realGisTarget = document.getElementById("google-gis-button-target");
+
+    if (window.google && window.google.accounts && clientId && !clientId.includes("your-google-client-id") && clientId.includes(".apps.googleusercontent.com")) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse
+        });
+        if (realGisTarget) {
+          realGisTarget.innerHTML = "";
+          window.google.accounts.id.renderButton(realGisTarget, {
+            theme: "outline",
+            size: "large",
+            width: 280,
+            text: "signin_with",
+            shape: "rectangular"
+          });
+          if (realGisWrapper) realGisWrapper.style.display = "flex";
+        }
+      } catch (err) {
+        console.warn("Inisialisasi Google Identity Services error:", err);
+      }
+    } else {
+      if (realGisWrapper) realGisWrapper.style.display = "none";
+    }
+  }
+
+  function handleGoogleCredentialResponse(response) {
+    if (!response || !response.credential) return;
+    const payload = parseJwt(response.credential);
+    if (payload) {
+      loginUser({
+        name: payload.name || "Pelanggan Google",
+        email: payload.email || "",
+        avatar: payload.picture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80",
+        phone: currentUser?.phone || "",
+        address: currentUser?.address || ""
+      });
+      closeLoginModal();
+      showToast(`Selamat datang, <strong>${escapeHtml(payload.name || 'Pelanggan')}</strong>!`);
+    }
+  }
+
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error("Gagal decode JWT Google:", e);
+      return null;
+    }
+  }
+
+  function loginUser(userData) {
+    currentUser = userData;
+    localStorage.setItem("pasar_pagi_user", JSON.stringify(currentUser));
+    updateAuthUI();
+  }
+
+  function logoutUser() {
+    currentUser = null;
+    localStorage.removeItem("pasar_pagi_user");
+    updateAuthUI();
+    closeUserDropdown();
+    showToast("Anda telah keluar dari akun customer.");
+  }
+
+  function getUserOrders() {
+    if (!currentUser) return customerOrders;
+    return customerOrders.filter(o => !o.customer || o.customer.email === currentUser.email || o.customer.name === currentUser.name);
+  }
+
+  function updateAuthUI() {
+    const guestEl = document.getElementById("auth-guest");
+    const userEl = document.getElementById("auth-user");
+    const menuBadge = document.getElementById("menu-order-badge");
+    const userOrders = getUserOrders();
+
+    const hasCompletedProfile = currentUser && currentUser.profileCompleted;
+
+    // Menu Toko Buah & Sayur di Navbar HANYA tampil jika profil sudah lengkap
+    if (navShopBtn) {
+      navShopBtn.style.display = hasCompletedProfile ? "inline-flex" : "none";
+    }
+
+    if (currentUser) {
+      if (guestEl) guestEl.style.display = "none";
+      if (userEl) userEl.style.display = "block";
+      const nameEl = document.getElementById("user-chip-name");
+      if (nameEl) nameEl.textContent = (currentUser.name || "Pelanggan").split(" ")[0];
+      
+      const avatarEl = document.getElementById("user-avatar-img");
+      if (avatarEl) {
+        if (currentUser.avatarEmoji) {
+          avatarEl.src = getAvatarDataUri(currentUser.avatarEmoji, currentUser.avatarBg || "#eaf6ea");
+        } else if (currentUser.avatar) {
+          avatarEl.src = currentUser.avatar;
+        } else {
+          avatarEl.src = getAvatarDataUri("🍎", "#fde8e8");
+        }
+      }
+
+      const menuName = document.getElementById("menu-user-name");
+      if (menuName) menuName.textContent = currentUser.name || "Pelanggan";
+      const menuEmail = document.getElementById("menu-user-email");
+      if (menuEmail) menuEmail.textContent = currentUser.email || "";
+
+      // Jika baru daftar Google dan belum melengkapi akun profil, langsung buka modal setup
+      if (!currentUser.profileCompleted) {
+        setTimeout(() => {
+          openProfileSetupModal();
+        }, 250);
+      }
+    } else {
+      if (guestEl) guestEl.style.display = "block";
+      if (userEl) userEl.style.display = "none";
+      if (currentPage === "shop") {
+        navigateTo("home");
+      }
+    }
+
+    if (menuBadge) {
+      menuBadge.textContent = userOrders.length;
+    }
+  }
+
+  function openLoginModal() {
+    if (loginModal) {
+      loginModal.classList.add("open");
+      document.body.style.overflow = "hidden";
+      initGoogleAuth();
+    }
+  }
+
+  function closeLoginModal() {
+    if (loginModal) {
+      loginModal.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  }
+
+  /* ============================================================
+     FUNGSI PEMBUATAN AKUN & ONBOARDING PROFIL (CUTE ICONS & FAVORITES)
+     ============================================================ */
+
+  function openProfileSetupModal() {
+    closeLoginModal();
+    closeUserDropdown();
+    if (!profileSetupModal) return;
+
+    // 1. Prefill Nama dari Akun Google
+    const nameInput = document.getElementById("setup-name");
+    if (nameInput) {
+      nameInput.value = (currentUser && currentUser.name) ? currentUser.name : "";
+    }
+
+    // 2. Prefill Umur
+    const ageInput = document.getElementById("setup-age");
+    if (ageInput) {
+      ageInput.value = (currentUser && currentUser.age) ? currentUser.age : 24;
+    }
+
+    // Prefill Kontak opsional
+    const phoneInput = document.getElementById("setup-phone");
+    if (phoneInput && currentUser?.phone) phoneInput.value = currentUser.phone;
+    const addrInput = document.getElementById("setup-address");
+    if (addrInput && currentUser?.address) addrInput.value = currentUser.address;
+
+    // 4. Default Icon Karakter Lucu
+    if (currentUser?.avatarEmoji) {
+      const match = CUTE_AVATARS.find(a => a.emoji === currentUser.avatarEmoji);
+      if (match) setupSelectedAvatar = match;
+    } else {
+      setupSelectedAvatar = CUTE_AVATARS[0];
+    }
+
+    // 3. Default Sayur & Buah Favorit
+    if (currentUser?.favoriteProduce && Array.isArray(currentUser.favoriteProduce)) {
+      setupSelectedProduces = new Set(currentUser.favoriteProduce);
+    } else {
+      setupSelectedProduces = new Set(["apel", "wortel"]);
+    }
+
+    renderSetupAvatarPreview();
+    renderSetupCuteAvatarGrid();
+    renderSetupProduceChips();
+
+    profileSetupModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeProfileSetupModal() {
+    if (profileSetupModal) {
+      profileSetupModal.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  }
+
+  function renderSetupAvatarPreview() {
+    const circle = document.getElementById("setup-avatar-preview-circle");
+    const emojiEl = document.getElementById("setup-avatar-preview-emoji");
+    const imgEl = document.getElementById("setup-avatar-preview-img");
+    const nameEl = document.getElementById("setup-avatar-preview-name");
+    const subEl = document.getElementById("setup-avatar-preview-sub");
+
+    if (setupSelectedAvatar.isGoogle && currentUser?.avatar) {
+      if (emojiEl) emojiEl.style.display = "none";
+      if (imgEl) {
+        imgEl.src = currentUser.avatar;
+        imgEl.style.display = "block";
+      }
+      if (nameEl) nameEl.textContent = "Foto Profil Google";
+      if (subEl) subEl.textContent = currentUser.name || "Foto Akun Asli";
+      if (circle) circle.style.background = "#ffffff";
+    } else {
+      if (imgEl) imgEl.style.display = "none";
+      if (emojiEl) {
+        emojiEl.textContent = setupSelectedAvatar.emoji;
+        emojiEl.style.display = "block";
+      }
+      if (nameEl) nameEl.textContent = setupSelectedAvatar.name;
+      if (subEl) subEl.textContent = setupSelectedAvatar.sub || "Karakter Pasar Pagi kamu";
+      if (circle) circle.style.background = setupSelectedAvatar.bg;
+    }
+  }
+
+  function renderSetupCuteAvatarGrid() {
+    const grid = document.getElementById("setup-cute-avatar-grid");
+    if (!grid) return;
+
+    let html = CUTE_AVATARS.map(avatar => {
+      const isSelected = setupSelectedAvatar.id === avatar.id && !setupSelectedAvatar.isGoogle;
+      return `
+        <button type="button" class="cute-avatar-btn ${isSelected ? 'selected' : ''}" data-avatar-id="${avatar.id}" title="${avatar.name}">
+          <div class="cute-avatar-badge" style="background: ${avatar.bg};">
+            <span>${avatar.emoji}</span>
+          </div>
+          <span class="cute-avatar-title">${avatar.name}</span>
+          <div class="cute-avatar-check"><i class="fas fa-check"></i></div>
+        </button>
+      `;
+    }).join("");
+
+    if (currentUser && currentUser.avatar && !currentUser.avatar.includes("ui-avatars.com")) {
+      const isGoogleSelected = setupSelectedAvatar.isGoogle;
+      html += `
+        <button type="button" class="cute-avatar-btn ${isGoogleSelected ? 'selected' : ''}" data-avatar-google="true" title="Gunakan Foto Akun Google Asli">
+          <div class="cute-avatar-badge" style="background: #ffffff; padding: 2px;">
+            <img src="${currentUser.avatar}" alt="Google" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+          </div>
+          <span class="cute-avatar-title">Foto Google</span>
+          <div class="cute-avatar-check"><i class="fas fa-check"></i></div>
+        </button>
+      `;
+    }
+
+    grid.innerHTML = html;
+  }
+
+  function renderSetupProduceChips() {
+    const container = document.getElementById("setup-fav-produce-chips");
+    if (!container) return;
+
+    container.innerHTML = FAVORITE_PRODUCE_LIST.map(prod => {
+      const isSelected = setupSelectedProduces.has(prod.id);
+      return `
+        <button type="button" class="produce-chip-btn ${isSelected ? 'selected' : ''}" data-produce-id="${prod.id}">
+          <span>${prod.icon}</span>
+          <span>${prod.label}</span>
+          <i class="fas fa-check produce-chip-check"></i>
+        </button>
+      `;
+    }).join("");
+  }
+
+  function openProfileModal() {
+    if (!currentUser) {
+      openLoginModal();
+      return;
+    }
+
+    const modalAvatar = document.getElementById("profile-modal-avatar");
+    const modalEmoji = document.getElementById("profile-modal-emoji");
+    const charTag = document.getElementById("profile-char-tag");
+
+    if (currentUser.avatarEmoji) {
+      if (modalEmoji) {
+        modalEmoji.textContent = currentUser.avatarEmoji;
+        modalEmoji.style.display = "block";
+      }
+      if (modalAvatar) modalAvatar.style.display = "none";
+      if (charTag) charTag.textContent = `${currentUser.avatarEmoji} ${currentUser.avatarName || 'Maskot Kebun'}`;
+    } else if (currentUser.avatar) {
+      if (modalAvatar) {
+        modalAvatar.src = currentUser.avatar;
+        modalAvatar.style.display = "block";
+      }
+      if (modalEmoji) modalEmoji.style.display = "none";
+      if (charTag) charTag.textContent = "📸 Foto Google";
+    }
+
+    const nameInput = document.getElementById("profile-name");
+    if (nameInput) nameInput.value = currentUser.name || "";
+    const ageInput = document.getElementById("profile-age");
+    if (ageInput) ageInput.value = currentUser.age || 24;
+
+    document.getElementById("profile-modal-name").textContent = currentUser.name || "Pelanggan";
+    document.getElementById("profile-modal-email").textContent = currentUser.email || "";
+    document.getElementById("profile-wa").value = currentUser.phone || "";
+    document.getElementById("profile-address").value = currentUser.address || "";
+
+    editSelectedAvatar = currentUser.avatarEmoji ? (CUTE_AVATARS.find(a => a.emoji === currentUser.avatarEmoji) || CUTE_AVATARS[0]) : CUTE_AVATARS[0];
+    editSelectedProduces = new Set(currentUser.favoriteProduce || ["apel", "wortel"]);
+    renderEditCuteAvatarGrid();
+    renderEditProduceChips();
+
+    closeUserDropdown();
+    if (profileModal) {
+      profileModal.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+  }
+
+  function renderEditCuteAvatarGrid() {
+    const grid = document.getElementById("profile-cute-avatar-grid");
+    if (!grid) return;
+    grid.innerHTML = CUTE_AVATARS.map(avatar => {
+      const isSelected = editSelectedAvatar && editSelectedAvatar.id === avatar.id;
+      return `
+        <button type="button" class="cute-avatar-btn ${isSelected ? 'selected' : ''}" data-edit-avatar-id="${avatar.id}" title="${avatar.name}">
+          <div class="cute-avatar-badge" style="background: ${avatar.bg};">
+            <span>${avatar.emoji}</span>
+          </div>
+          <span class="cute-avatar-title">${avatar.name}</span>
+          <div class="cute-avatar-check"><i class="fas fa-check"></i></div>
+        </button>
+      `;
+    }).join("");
+  }
+
+  function renderEditProduceChips() {
+    const container = document.getElementById("profile-fav-produce-chips");
+    if (!container) return;
+    container.innerHTML = FAVORITE_PRODUCE_LIST.map(prod => {
+      const isSelected = editSelectedProduces.has(prod.id);
+      return `
+        <button type="button" class="produce-chip-btn ${isSelected ? 'selected' : ''}" data-edit-produce-id="${prod.id}">
+          <span>${prod.icon}</span>
+          <span>${prod.label}</span>
+          <i class="fas fa-check produce-chip-check"></i>
+        </button>
+      `;
+    }).join("");
+  }
+
+  function closeProfileModal() {
+    if (profileModal) {
+      profileModal.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  }
+
+  function openOrdersModal() {
+    closeUserDropdown();
+    renderOrdersList();
+    if (ordersModal) {
+      ordersModal.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+  }
+
+  function closeOrdersModal() {
+    if (ordersModal) {
+      ordersModal.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  }
+
+  function toggleUserDropdown() {
+    if (!userDropdownMenu) return;
+    const isShowing = userDropdownMenu.classList.contains("show");
+    if (isShowing) {
+      closeUserDropdown();
+    } else {
+      userDropdownMenu.classList.add("show");
+      if (userChipBtn) userChipBtn.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  function closeUserDropdown() {
+    if (userDropdownMenu) {
+      userDropdownMenu.classList.remove("show");
+      if (userChipBtn) userChipBtn.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function renderOrdersList() {
+    const container = document.getElementById("orders-list-container");
+    if (!container) return;
+    const userOrders = getUserOrders();
+
+    if (!userOrders || userOrders.length === 0) {
+      container.innerHTML = `
+        <div class="orders-empty-state">
+          <i class="fas fa-basket-shopping"></i>
+          <h4>Belum Ada Pesanan</h4>
+          <p>Anda belum memiliki riwayat transaksi belanja. Mulai pilih buah manis & sayur segar hari ini!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = userOrders.map(order => {
+      let statusBadge = '';
+      if (order.status === 'paid') {
+        statusBadge = `<span class="order-hist-status status-paid"><i class="fas fa-check-circle"></i> Lunas (QRIS)</span>`;
+      } else if (order.status === 'cod') {
+        statusBadge = `<span class="order-hist-status status-cod"><i class="fas fa-truck-fast"></i> COD (Disiapkan)</span>`;
+      } else {
+        statusBadge = `<span class="order-hist-status status-pending"><i class="fas fa-clock"></i> Menunggu Transfer</span>`;
+      }
+
+      const itemsHtml = (order.items || []).map(i => `
+        <div class="order-hist-item-row">
+          <span>${escapeHtml(i.name)} (${i.weightLabel}) &times; ${i.count}</span>
+          <strong>${formatMoney(i.count * i.price)}</strong>
+        </div>
+      `).join("");
+
+      return `
+        <div class="order-history-card">
+          <div class="order-hist-header">
+            <div>
+              <span class="order-hist-id">#${order.id}</span>
+              <div class="order-hist-date">${order.displayDate || order.date}</div>
+            </div>
+            ${statusBadge}
+          </div>
+          <div class="order-hist-items">
+            ${itemsHtml}
+          </div>
+          <div class="order-hist-footer">
+            <div class="order-hist-method">
+              <i class="fas fa-wallet"></i> ${escapeHtml(order.paymentMethodName || 'Pembayaran')}
+            </div>
+            <div class="order-hist-total">${formatMoney(order.breakdown ? order.breakdown.total : 0)}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  /* ============================================================
+     FUNGSI SISTEM PEMBAYARAN (QRIS, TRANSFER BANK, COD)
+     ============================================================ */
+
+  function selectPaymentMethod(methodKey) {
+    activePaymentMethod = methodKey;
+    document.querySelectorAll(".payment-option").forEach(opt => {
+      const isMatch = opt.dataset.payment === methodKey;
+      opt.classList.toggle("active", isMatch);
+      const radio = opt.querySelector('input[type="radio"]');
+      if (radio) radio.checked = isMatch;
+    });
+
+    document.querySelectorAll(".payment-panel").forEach(panel => {
+      panel.classList.toggle("active", panel.id === `panel-${methodKey}`);
+    });
+
+    if (methodKey === "qris") {
+      startQrisTimer();
+    } else {
+      stopQrisTimer();
+    }
+  }
+
+  function selectBank(bankKey) {
+    if (!BANK_ACCOUNTS[bankKey]) return;
+    selectedBank = bankKey;
+    document.querySelectorAll(".bank-chip").forEach(chip => {
+      chip.classList.toggle("active", chip.dataset.bank === bankKey);
+    });
+    const acc = BANK_ACCOUNTS[bankKey];
+    const nameEl = document.getElementById("selected-bank-name");
+    const numEl = document.getElementById("selected-bank-number");
+    if (nameEl) nameEl.textContent = acc.name;
+    if (numEl) numEl.textContent = acc.number;
+  }
+
+  function copyBankAccount() {
+    const acc = BANK_ACCOUNTS[selectedBank];
+    if (!acc) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(acc.rawNumber).then(() => {
+        showToast(`Nomor rekening <strong>${acc.code} (${acc.rawNumber})</strong> berhasil disalin!`);
+      }).catch(() => fallbackCopy(acc.rawNumber));
+    } else {
+      fallbackCopy(acc.rawNumber);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const input = document.createElement("input");
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    try {
+      document.execCommand("copy");
+      showToast(`Nomor rekening berhasil disalin: <strong>${text}</strong>`);
+    } catch (e) {
+      showToast(`Silakan salin manual: ${text}`);
+    }
+    document.body.removeChild(input);
+  }
+
+  function startQrisTimer() {
+    stopQrisTimer();
+    qrisSecondsLeft = 15 * 60;
+    updateQrisTimerDisplay();
+    qrisTimerInterval = setInterval(() => {
+      qrisSecondsLeft--;
+      if (qrisSecondsLeft <= 0) {
+        stopQrisTimer();
+        const timerEl = document.getElementById("qris-timer");
+        if (timerEl) timerEl.textContent = "Kedaluwarsa";
+      } else {
+        updateQrisTimerDisplay();
+      }
+    }, 1000);
+  }
+
+  function stopQrisTimer() {
+    if (qrisTimerInterval) {
+      clearInterval(qrisTimerInterval);
+      qrisTimerInterval = null;
+    }
+  }
+
+  function updateQrisTimerDisplay() {
+    const el = document.getElementById("qris-timer");
+    if (!el) return;
+    const mins = Math.floor(qrisSecondsLeft / 60).toString().padStart(2, '0');
+    const secs = (qrisSecondsLeft % 60).toString().padStart(2, '0');
+    el.textContent = `${mins}:${secs}`;
+  }
+
   /* MODAL REVIEW CHECKOUT */
   function openReview() {
     if (Object.keys(cart).length === 0) {
@@ -902,7 +1696,7 @@ document.addEventListener("DOMContentLoaded", () => {
       row.className = "review-line";
       row.innerHTML = `
         <div class="review-line-left">
-          <span class="review-item-name">${item.name} <strong class="review-weight-badge">(${item.weightLabel})</strong></span>
+          <span class="review-item-name">${escapeHtml(item.name)} <strong class="review-weight-badge">(${item.weightLabel})</strong></span>
           <span class="review-item-qty">x ${item.count}</span>
         </div>
         <span class="review-item-total">${formatMoney(line)}</span>
@@ -927,7 +1721,42 @@ document.addEventListener("DOMContentLoaded", () => {
       noteWrap.appendChild(n);
     }
 
-    renderBreakdownRows(document.getElementById("review-breakdown"), buildBreakdown(subtotal));
+    const breakdown = buildBreakdown(subtotal);
+    renderBreakdownRows(document.getElementById("review-breakdown"), breakdown);
+
+    // Update info akun pelanggan pada checkout
+    const authBanner = document.getElementById("checkout-auth-banner");
+    const loggedCard = document.getElementById("checkout-logged-user");
+    const nameInput = document.getElementById("checkout-name");
+    const phoneInput = document.getElementById("checkout-phone");
+    const addressInput = document.getElementById("checkout-address");
+
+    if (currentUser) {
+      if (authBanner) authBanner.style.display = "none";
+      if (loggedCard) loggedCard.style.display = "flex";
+      const avatarEl = document.getElementById("checkout-user-avatar");
+      if (avatarEl) avatarEl.src = currentUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80";
+      const nameEl = document.getElementById("checkout-user-name");
+      if (nameEl) nameEl.textContent = currentUser.name;
+      const emailEl = document.getElementById("checkout-user-email");
+      if (emailEl) emailEl.textContent = currentUser.email;
+
+      if (nameInput && !nameInput.value) nameInput.value = currentUser.name;
+      if (phoneInput && !phoneInput.value) phoneInput.value = currentUser.phone || "";
+      if (addressInput && !addressInput.value) addressInput.value = currentUser.address || "";
+    } else {
+      if (authBanner) authBanner.style.display = "flex";
+      if (loggedCard) loggedCard.style.display = "none";
+    }
+
+    // Set jumlah tagihan di QRIS
+    const qrisAmountEl = document.getElementById("qris-total-amount");
+    if (qrisAmountEl) qrisAmountEl.textContent = formatMoney(breakdown.total);
+
+    // Aktifkan panel metode pembayaran
+    selectPaymentMethod(activePaymentMethod || "qris");
+    selectBank(selectedBank || "bca");
+
     reviewModal.classList.add("open");
     document.body.style.overflow = "hidden";
   }
@@ -935,19 +1764,100 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeReview() {
     reviewModal.classList.remove("open");
     document.body.style.overflow = "";
+    stopQrisTimer();
   }
 
-  /* PESANAN MASUK (PENGURANGAN STOK TIMBANGAN KG) */
-  function placeOrder() {
-    const breakdown = buildBreakdown(
-      Object.values(cart).reduce((sum, item) => sum + item.count * item.price, 0)
-    );
+  /* PESANAN MASUK (VALIDASI LENGKAP & INTEGRASI CUSTOMER) */
+  let isPlacingOrder = false;
+  async function placeOrder() {
+    if (isPlacingOrder) return;
+    isPlacingOrder = true;
+    try {
+      const nameInput = document.getElementById("checkout-name");
+      const phoneInput = document.getElementById("checkout-phone");
+      const addressInput = document.getElementById("checkout-address");
 
-    const orderedItems = Object.values(cart).map((i) => ({ ...i }));
-    const orderNote = document.getElementById("note").value.trim();
-    const orderId = "PP-" + Math.floor(100000 + Math.random() * 900000);
-    const paymentMethodEl = document.querySelector('input[name="payment-method"]:checked');
-    const paymentMethodName = paymentMethodEl ? paymentMethodEl.parentElement.querySelector("span").textContent : "QRIS Instan";
+      const recipientName = nameInput ? nameInput.value.trim() : "";
+      const recipientPhone = phoneInput ? phoneInput.value.trim() : "";
+      const recipientAddress = addressInput ? addressInput.value.trim() : "";
+
+      console.log("[PLACE_ORDER] Start. Recipient:", recipientName, "Phone:", recipientPhone, "Address:", recipientAddress, "Method:", activePaymentMethod);
+
+      if (!recipientName) {
+        showToast("Mohon masukkan nama lengkap penerima paket.");
+        if (nameInput) nameInput.focus();
+        return;
+      }
+      if (!recipientPhone || recipientPhone.length < 8) {
+        showToast("Mohon masukkan nomor WhatsApp / Telepon aktif.");
+        if (phoneInput) phoneInput.focus();
+        return;
+      }
+      if (!recipientAddress || recipientAddress.length < 8) {
+        showToast("Mohon masukkan alamat lengkap pengiriman.");
+        if (addressInput) addressInput.focus();
+        return;
+      }
+
+      const breakdown = buildBreakdown(
+        Object.values(cart).reduce((sum, item) => sum + item.count * item.price, 0)
+      );
+
+      const orderedItems = Object.values(cart).map((i) => ({ ...i }));
+      const orderNote = document.getElementById("note").value.trim();
+      const orderId = "PP-" + Math.floor(100000 + Math.random() * 900000);
+
+      let paymentMethodName = "QRIS Dinamis Mandiri";
+      let orderStatus = "pending";
+      let bankInfo = null;
+      let mpgData = null;
+
+      const confirmBtn = document.getElementById("review-confirm");
+      const originalBtnContent = confirmBtn ? confirmBtn.innerHTML : "";
+
+      if (activePaymentMethod === "transfer") {
+        bankInfo = BANK_ACCOUNTS[selectedBank] || BANK_ACCOUNTS.bca;
+        paymentMethodName = `Transfer Bank (${bankInfo.code})`;
+        orderStatus = "pending";
+      } else if (activePaymentMethod === "cod") {
+        paymentMethodName = "Bayar di Tempat (COD)";
+        orderStatus = "cod";
+      } else {
+        // Mandiri Private Gateway (MPG) QRIS Dinamis
+        paymentMethodName = "QRIS Dinamis Mandiri (0% MDR)";
+        orderStatus = "pending";
+
+        if (confirmBtn) {
+          confirmBtn.disabled = true;
+          confirmBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Menyiapkan QRIS Mandiri...`;
+        }
+
+        try {
+          console.log("[PLACE_ORDER] Calling requestMpgInvoice for order:", orderId, "amount:", breakdown.total);
+          mpgData = await requestMpgInvoice({
+            orderId,
+            amount: breakdown.total,
+            customerName: recipientName,
+            customerEmail: currentUser ? currentUser.email : "pelanggan@pasarpagi.id",
+            customerPhone: recipientPhone,
+            items: orderedItems
+          });
+          console.log("[PLACE_ORDER] requestMpgInvoice success:", mpgData);
+        } catch (err) {
+          console.error("[CHECKOUT_ERROR] Gagal menerbitkan QRIS MPG:", err);
+          showToast("Gagal menerbitkan QRIS Dinamis. Coba lagi atau gunakan Transfer Bank.");
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalBtnContent;
+          }
+          return;
+        } finally {
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalBtnContent;
+          }
+        }
+      }
 
     // PENGURANGAN STOK NYATA BERBASIS KG
     orderedItems.forEach((ordered) => {
@@ -956,6 +1866,49 @@ document.addEventListener("DOMContentLoaded", () => {
         official.stockKg = Math.max(0, Math.round((official.stockKg - (ordered.weightKg * ordered.count)) * 10) / 10);
       }
     });
+
+    // SIMPAN KE RIWAYAT PESANAN (ORDER HISTORY)
+    const now = new Date();
+    const orderRecord = {
+      id: orderId,
+      date: now.toISOString(),
+      displayDate: now.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + " WIB",
+      customer: {
+        name: recipientName,
+        email: currentUser ? currentUser.email : "guest@pasarpagi.id",
+        phone: recipientPhone,
+        address: recipientAddress
+      },
+      items: orderedItems,
+      breakdown: breakdown,
+      paymentMethod: activePaymentMethod,
+      paymentMethodName: paymentMethodName,
+      bank: bankInfo,
+      status: orderStatus,
+      note: orderNote,
+      checkoutUrl: mpgData ? mpgData.checkoutUrl : null,
+      qrString: mpgData ? mpgData.qrString : null,
+      mpgUniqueCode: mpgData ? mpgData.uniqueCode : 0,
+      mpgTotalAmount: mpgData ? mpgData.totalAmount : breakdown.total
+    };
+
+    customerOrders.unshift(orderRecord);
+    localStorage.setItem("pasar_pagi_orders", JSON.stringify(customerOrders));
+
+    // Perbarui profil default jika pengguna telah login
+    if (currentUser) {
+      currentUser.phone = recipientPhone;
+      currentUser.address = recipientAddress;
+      localStorage.setItem("pasar_pagi_user", JSON.stringify(currentUser));
+      updateAuthUI();
+    }
 
     closeReview();
 
@@ -969,38 +1922,107 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderCart();
 
-    // Buka Modal Sukses & Resi
-    openSuccessModal(orderId, orderedItems, breakdown, paymentMethodName, orderNote);
-  }
+    // Buka Modal Sukses & Resi Lengkap
+    openSuccessModal(orderRecord);
 
-  function openSuccessModal(orderId, items, breakdown, paymentMethod, note) {
+    // Opsi A (Hosted Checkout Redirect): Buka layar barcode QRIS resmi MPG
+    if (orderRecord.checkoutUrl) {
+      try {
+        const payWin = window.open(orderRecord.checkoutUrl, "_blank");
+        if (!payWin || payWin.closed || typeof payWin.closed === "undefined") {
+          // Jika popup diblokir oleh setelan browser, alihkan otomatis setelah 1 detik
+          setTimeout(() => {
+            window.location.href = orderRecord.checkoutUrl;
+          }, 1000);
+        }
+      } catch (err) {
+        window.location.href = orderRecord.checkoutUrl;
+      }
+    }
+  } finally {
+    isPlacingOrder = false;
+  }
+}
+
+  function openSuccessModal(order) {
     const receiptEl = document.getElementById("order-receipt-content");
-    const itemsListHtml = items.map(i => `
+    const itemsListHtml = (order.items || []).map(i => `
       <div class="receipt-item-row">
-        <span>${i.name} (${i.weightLabel}) &times; ${i.count}</span>
+        <span>${escapeHtml(i.name)} (${i.weightLabel}) &times; ${i.count}</span>
         <strong>${formatMoney(i.count * i.price)}</strong>
       </div>
     `).join("");
 
+    let paymentDetailHtml = "";
+    if (order.paymentMethod === "transfer" && order.bank) {
+      paymentDetailHtml = `
+        <div class="receipt-payment-guide-box">
+          <p><i class="fas fa-building-columns"></i> Transfer ke <strong>${order.bank.name}</strong>:</p>
+          <div class="receipt-acc-row">
+            <code>${order.bank.number}</code>
+            <span>a.n ${order.bank.holder}</span>
+          </div>
+          <small>Status: <strong style="color: #f57f17;">Menunggu Transfer</strong>. Pesanan diproses setelah dana masuk.</small>
+        </div>
+      `;
+    } else if (order.paymentMethod === "cod") {
+      paymentDetailHtml = `
+        <div class="receipt-payment-guide-box">
+          <p><i class="fas fa-hand-holding-dollar"></i> Metode: <strong>Bayar di Tempat (COD)</strong></p>
+          <small>Status: <strong style="color: #1565c0;">Pesanan Sedang Disiapkan</strong>. Siapkan uang pas <strong>${formatMoney(order.breakdown.total)}</strong> saat kurir tiba.</small>
+        </div>
+      `;
+    } else {
+      paymentDetailHtml = `
+        <div class="receipt-payment-guide-box">
+          <p><i class="fas fa-qrcode"></i> Metode: <strong>QRIS Dinamis Mandiri (0% MDR)</strong></p>
+          ${order.checkoutUrl ? `
+            <div style="margin: 0.75rem 0; padding: 0.85rem; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.35rem;">
+                <span style="font-size: 0.85rem; color: #166534; font-weight: 700;">
+                  <i class="fas fa-shield-halved"></i> Mandiri Private Gateway
+                </span>
+                <span style="font-size: 0.8rem; background: #bbf7d0; color: #14532d; padding: 2px 8px; border-radius: 999px; font-weight: 700;">
+                  +Kode Unik: Rp ${order.mpgUniqueCode || 0}
+                </span>
+              </div>
+              <div style="margin-bottom: 0.65rem; font-size: 0.95rem; color: #14532d;">
+                Nominal Tagihan Pas: <strong style="font-size: 1.1rem; color: #15803d;">${formatMoney(order.mpgTotalAmount || order.breakdown.total)}</strong>
+              </div>
+              <a href="${order.checkoutUrl}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; padding: 0.65rem 1rem; border-radius: 8px; font-weight: 700; background: #16a34a; color: #ffffff; box-shadow: 0 4px 10px rgba(22,163,74,0.3); transition: all 0.2s ease;">
+                <i class="fas fa-arrow-up-right-from-square"></i> Buka Barcode QRIS (Hosted Checkout)
+              </a>
+              <small style="display: block; margin-top: 0.5rem; text-align: center; color: #15803d; font-size: 0.78rem;">
+                <i class="fas fa-mobile-screen-button"></i> Scan langsung dengan Livin' Mandiri, BCA, GoPay, OVO, ShopeePay, DANA
+              </small>
+            </div>
+          ` : ""}
+          <small>Status: <strong style="color: ${order.status === 'PAID' || order.status === 'paid' ? '#16a34a' : '#f57f17'};">${order.status === 'PAID' || order.status === 'paid' ? '<i class="fas fa-check-circle"></i> Terverifikasi Lunas' : '<i class="fas fa-clock"></i> Menunggu Scan & Pembayaran QRIS'}</strong> (Otomatis dicek oleh listener kasir).</small>
+        </div>
+      `;
+    }
+
     receiptEl.innerHTML = `
       <div class="receipt-header">
-        <div class="receipt-id-tag">No. Pesanan: <strong>#${orderId}</strong></div>
-        <div class="receipt-date">${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+        <div class="receipt-id-tag">No. Pesanan: <strong>#${order.id}</strong></div>
+        <div class="receipt-date">${order.displayDate}</div>
       </div>
       <div class="receipt-divider"></div>
       <div class="receipt-items-box">${itemsListHtml}</div>
       <div class="receipt-divider"></div>
       <div class="receipt-totals-box">
-        <div class="receipt-row"><span>Subtotal:</span><span>${formatMoney(breakdown.subtotal)}</span></div>
-        <div class="receipt-row"><span>Biaya Penanganan:</span><span>${formatMoney(breakdown.fee)}</span></div>
-        ${breakdown.potongan > 0 ? `<div class="receipt-row receipt-discount"><span>Diskon Kupon (90%):</span><span>-${formatMoney(breakdown.potongan)}</span></div>` : ""}
-        <div class="receipt-row receipt-grand"><span>Total Bayar:</span><strong>${formatMoney(breakdown.total)}</strong></div>
+        <div class="receipt-row"><span>Subtotal:</span><span>${formatMoney(order.breakdown.subtotal)}</span></div>
+        <div class="receipt-row"><span>Biaya Penanganan:</span><span>${formatMoney(order.breakdown.fee)}</span></div>
+        ${order.breakdown.potongan > 0 ? `<div class="receipt-row receipt-discount"><span>Diskon Kupon:</span><span>-${formatMoney(order.breakdown.potongan)}</span></div>` : ""}
+        <div class="receipt-row receipt-grand"><span>Total Bayar:</span><strong>${formatMoney(order.breakdown.total)}</strong></div>
       </div>
       <div class="receipt-divider"></div>
-      <div class="receipt-meta-info">
-        <p><i class="fas fa-wallet"></i> Metode: <strong>${paymentMethod}</strong></p>
-        ${note ? `<p><i class="fas fa-comment-dots"></i> Catatan: <em>"${escapeHtml(note)}"</em></p>` : ""}
-        <p><i class="fas fa-truck"></i> Estimasi Kirim: <strong>Pagi ini pukul 08:30 - 10:00 WIB</strong></p>
+      ${paymentDetailHtml}
+      <div class="receipt-meta-info" style="margin-top: 0.75rem;">
+        <p><i class="fas fa-user"></i> Penerima: <strong>${escapeHtml(order.customer.name)}</strong> (${escapeHtml(order.customer.phone)})</p>
+        <p><i class="fas fa-location-dot"></i> Alamat: <em>${escapeHtml(order.customer.address)}</em></p>
+        ${order.note ? `<p><i class="fas fa-comment-dots"></i> Catatan Petani: <em>"${escapeHtml(order.note)}"</em></p>` : ""}
+        <p><i class="fas fa-truck"></i> Estimasi Kirim: <strong>Pagi ini pukul 08:30 - 10:30 WIB</strong></p>
       </div>
     `;
 
@@ -1032,7 +2054,18 @@ document.addEventListener("DOMContentLoaded", () => {
      ============================================================ */
 
   document.addEventListener("click", (event) => {
-    const target = event.target.closest("button, .perk-coupon, .dept-pill, .payment-option, .modal-overlay, #clear-search, #reset-filter-btn, #brand-logo, .preset-chip, .volume-step-btn");
+    // 1. Tangani penutupan jika pengguna klik langsung di luar kartu (pada latar belakang gelap / backdrop)
+    if (event.target && event.target.classList && event.target.classList.contains("modal-overlay")) {
+      if (event.target === reviewModal) closeReview();
+      if (event.target === successModal) closeSuccessModal();
+      if (event.target === loginModal) closeLoginModal();
+      if (event.target === profileSetupModal) closeProfileSetupModal();
+      if (event.target === profileModal) closeProfileModal();
+      if (event.target === ordersModal) closeOrdersModal();
+      return;
+    }
+
+    const target = event.target.closest("button, .perk-coupon, .dept-pill, .payment-option, #clear-search, #reset-filter-btn, #brand-logo, .preset-chip, .volume-step-btn");
     if (!target) return;
 
     // Navigasi Tabs Navbar
@@ -1191,22 +2224,22 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     // Checkout tombol
-    if (target.id === "checkout-button") {
+    if (target.id === "checkout-button" || target.closest("#checkout-button")) {
       openReview();
       return;
     }
     // Konfirmasi pesanan
-    if (target.id === "review-confirm") {
+    if (target.id === "review-confirm" || target.closest("#review-confirm")) {
       placeOrder();
       return;
     }
     // Kembali atau tutup review modal
-    if (target.id === "review-back" || target.id === "modal-close-btn" || target === reviewModal) {
+    if (target.id === "review-back" || target.closest("#review-back") || target.id === "modal-close-btn" || target.closest("#modal-close-btn")) {
       closeReview();
       return;
     }
     // Tutup success modal
-    if (target.id === "success-close-btn" || target === successModal) {
+    if (target.id === "success-close-btn" || target.closest("#success-close-btn")) {
       closeSuccessModal();
       return;
     }
@@ -1230,15 +2263,352 @@ document.addEventListener("DOMContentLoaded", () => {
       renderProducts();
       return;
     }
-    // Opsi Pembayaran di Modal
-    if (target.classList.contains("payment-option")) {
-      document.querySelectorAll(".payment-option").forEach(opt => opt.classList.remove("active"));
-      target.classList.add("active");
-      const radio = target.querySelector('input[type="radio"]');
-      if (radio) radio.checked = true;
+
+    // ============================================================
+    //  EVENT LISTENERS: AKUN CUSTOMER & GOOGLE LOGIN
+    // ============================================================
+
+    // Buka Modal Login Google
+    if (target.id === "btn-open-login" || target.closest("#btn-open-login") || target.id === "btn-checkout-login") {
+      openLoginModal();
+      return;
+    }
+
+    // Tutup Modal Login
+    if (target.id === "login-modal-close" || target.closest("#login-modal-close") || target === loginModal) {
+      closeLoginModal();
+      return;
+    }
+
+    // Login Akun Google Utama Pengguna (Guntur Rizqi)
+    if (target.id === "btn-login-guntur" || target.closest("#btn-login-guntur")) {
+      loginUser({
+        name: "Guntur Rizqi",
+        email: "gunturrizqi444@gmail.com",
+        phone: currentUser?.phone || "081298765432",
+        address: currentUser?.address || "Pamulang, Tangerang Selatan",
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80",
+        profileCompleted: true,
+        avatarEmoji: "🍎",
+        avatarBg: "#fde8e8"
+      });
+      closeLoginModal();
+      navigateTo("shop");
+      showToast(`Login Google berhasil sebagai <strong>Guntur Rizqi</strong>!`);
+      return;
+    }
+
+    // Toggle Form Akun Google Lainnya
+    const toggleCustomGoogleBtn = target.closest("#btn-toggle-custom-google");
+    if (toggleCustomGoogleBtn) {
+      const form = document.getElementById("custom-google-form");
+      const icon = document.getElementById("toggle-custom-google-icon");
+      if (form) {
+        const isHidden = form.style.display === "none";
+        form.style.display = isHidden ? "flex" : "none";
+        if (icon) {
+          icon.className = isHidden ? "fas fa-chevron-up" : "fas fa-chevron-down";
+        }
+      }
+      return;
+    }
+
+    // Demo User Login (Pilihan profil instan)
+    const demoBtn = target.closest(".demo-user-btn");
+    if (demoBtn) {
+      const name = demoBtn.dataset.demoName || "Pelanggan Demo";
+      const email = demoBtn.dataset.demoEmail || "demo@pasarpagi.id";
+      const phone = demoBtn.dataset.demoPhone || "081234567890";
+      const address = demoBtn.dataset.demoAddress || "Jalan Melati No. 10";
+      const avatarImg = demoBtn.querySelector(".demo-avatar");
+      const avatar = avatarImg ? avatarImg.src : "";
+
+      loginUser({
+        name,
+        email,
+        phone,
+        address,
+        avatar,
+        profileCompleted: true,
+        avatarEmoji: "🥑",
+        avatarBg: "#eaf6ea"
+      });
+      closeLoginModal();
+      navigateTo("shop");
+      showToast(`Login demo berhasil sebagai <strong>${escapeHtml(name)}</strong>!`);
+      return;
+    }
+
+    // Toggle Dropdown Menu Profil
+    if (target.id === "user-chip-btn" || target.closest("#user-chip-btn")) {
+      toggleUserDropdown();
+      return;
+    }
+
+    // Buka Modal Profil / Edit Alamat
+    if (target.id === "menu-btn-profile" || target.closest("#menu-btn-profile") || target.id === "btn-edit-profile-quick") {
+      openProfileModal();
+      return;
+    }
+
+    // Buka Modal Riwayat Pesanan
+    if (target.id === "menu-btn-orders" || target.closest("#menu-btn-orders") || target.id === "success-view-orders-btn") {
+      if (successModal.classList.contains("open")) closeSuccessModal();
+      openOrdersModal();
+      return;
+    }
+
+    // Logout Akun
+    if (target.id === "menu-btn-logout" || target.closest("#menu-btn-logout")) {
+      logoutUser();
+      return;
+    }
+
+    // Tutup Modal Profil Edit
+    if (target.id === "profile-modal-close" || target.id === "profile-modal-cancel" || target === profileModal) {
+      closeProfileModal();
+      return;
+    }
+
+    // Tutup Modal Pembuatan Profil Baru
+    if (target.id === "profile-setup-close" || target.closest("#profile-setup-close") || target === profileSetupModal) {
+      closeProfileSetupModal();
+      return;
+    }
+
+    // Pemilihan Icon Karakter Lucu di Modal Setup
+    const cuteAvatarBtn = target.closest("#setup-cute-avatar-grid .cute-avatar-btn");
+    if (cuteAvatarBtn) {
+      if (cuteAvatarBtn.dataset.avatarGoogle) {
+        setupSelectedAvatar = { isGoogle: true, name: "Foto Profil Google", sub: currentUser?.name || "Foto Akun Asli" };
+      } else {
+        const aId = cuteAvatarBtn.dataset.avatarId;
+        const match = CUTE_AVATARS.find(a => a.id === aId);
+        if (match) setupSelectedAvatar = match;
+      }
+      renderSetupAvatarPreview();
+      renderSetupCuteAvatarGrid();
+      return;
+    }
+
+    // Pemilihan Sayur / Buah Kesukaan di Modal Setup
+    const produceChipBtn = target.closest("#setup-fav-produce-chips .produce-chip-btn");
+    if (produceChipBtn) {
+      const pId = produceChipBtn.dataset.produceId;
+      if (pId) {
+        if (setupSelectedProduces.has(pId)) {
+          if (setupSelectedProduces.size > 1) {
+            setupSelectedProduces.delete(pId);
+          } else {
+            showToast("Pilih minimal 1 buah atau sayuran kesukaan!");
+          }
+        } else {
+          setupSelectedProduces.add(pId);
+        }
+        renderSetupProduceChips();
+      }
+      return;
+    }
+
+    // Pemilihan Ganti Icon Karakter di Modal Profil Edit
+    const editAvatarBtn = target.closest("#profile-cute-avatar-grid .cute-avatar-btn");
+    if (editAvatarBtn) {
+      const aId = editAvatarBtn.dataset.editAvatarId;
+      const match = CUTE_AVATARS.find(a => a.id === aId);
+      if (match) {
+        editSelectedAvatar = match;
+        const modalEmoji = document.getElementById("profile-modal-emoji");
+        const modalAvatar = document.getElementById("profile-modal-avatar");
+        const charTag = document.getElementById("profile-char-tag");
+        if (modalEmoji) {
+          modalEmoji.textContent = match.emoji;
+          modalEmoji.style.display = "block";
+        }
+        if (modalAvatar) modalAvatar.style.display = "none";
+        if (charTag) charTag.textContent = `${match.emoji} ${match.name}`;
+        renderEditCuteAvatarGrid();
+      }
+      return;
+    }
+
+    // Pemilihan Sayur / Buah Kesukaan di Modal Profil Edit
+    const editProduceChipBtn = target.closest("#profile-fav-produce-chips .produce-chip-btn");
+    if (editProduceChipBtn) {
+      const pId = editProduceChipBtn.dataset.editProduceId;
+      if (pId) {
+        if (editSelectedProduces.has(pId)) {
+          if (editSelectedProduces.size > 1) {
+            editSelectedProduces.delete(pId);
+          }
+        } else {
+          editSelectedProduces.add(pId);
+        }
+        renderEditProduceChips();
+      }
+      return;
+    }
+
+    // Tutup Modal Riwayat Pesanan
+    if (target.id === "orders-modal-close" || target.closest("#orders-modal-close") || target === ordersModal) {
+      closeOrdersModal();
+      return;
+    }
+
+    // ============================================================
+    //  EVENT LISTENERS: METODE PEMBAYARAN (QRIS, BANK, COD)
+    // ============================================================
+
+    // Opsi Pembayaran di Modal Checkout
+    const payOpt = target.closest(".payment-option");
+    if (payOpt) {
+      const method = payOpt.dataset.payment || (payOpt.querySelector('input[type="radio"]') ? payOpt.querySelector('input[type="radio"]').value : "qris");
+      selectPaymentMethod(method);
+      return;
+    }
+
+    // Pilih Bank Transfer (BCA, Mandiri, BRI, BNI)
+    const bankChip = target.closest(".bank-chip");
+    if (bankChip && bankChip.dataset.bank) {
+      selectBank(bankChip.dataset.bank);
+      return;
+    }
+
+    // Salin Nomor Rekening Bank
+    if (target.id === "btn-copy-account" || target.closest("#btn-copy-account")) {
+      copyBankAccount();
       return;
     }
   });
+
+  /* TUTUP DROPDOWN MENU KETIKA KLIK DI LUAR */
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#user-chip-btn") && !e.target.closest("#user-dropdown-menu")) {
+      closeUserDropdown();
+    }
+  });
+
+  /* SUBMIT FORM PEMBUATAN AKUN & ONBOARDING PROFIL */
+  const profileSetupForm = document.getElementById("profile-setup-form");
+  if (profileSetupForm) {
+    profileSetupForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const nameInput = document.getElementById("setup-name");
+      const ageInput = document.getElementById("setup-age");
+      const phoneInput = document.getElementById("setup-phone");
+      const addrInput = document.getElementById("setup-address");
+
+      const name = nameInput ? nameInput.value.trim() : (currentUser.name || "Pelanggan");
+      const age = ageInput ? parseInt(ageInput.value, 10) : 24;
+      const phone = phoneInput ? phoneInput.value.trim() : "";
+      const address = addrInput ? addrInput.value.trim() : "";
+
+      if (!name) {
+        showToast("Nama lengkap wajib diisi!");
+        return;
+      }
+      if (isNaN(age) || age < 5 || age > 120) {
+        showToast("Mohon masukkan umur yang valid (5 - 120 tahun)!");
+        return;
+      }
+
+      currentUser.name = name;
+      currentUser.age = age;
+      currentUser.favoriteProduce = Array.from(setupSelectedProduces);
+
+      if (setupSelectedAvatar.isGoogle) {
+        currentUser.avatarEmoji = "";
+        currentUser.avatarName = "Foto Google";
+        currentUser.avatarBg = "#ffffff";
+      } else {
+        currentUser.avatarEmoji = setupSelectedAvatar.emoji;
+        currentUser.avatarName = setupSelectedAvatar.name;
+        currentUser.avatarBg = setupSelectedAvatar.bg;
+        currentUser.avatar = getAvatarDataUri(setupSelectedAvatar.emoji, setupSelectedAvatar.bg);
+      }
+
+      if (phone) currentUser.phone = phone;
+      if (address) currentUser.address = address;
+      currentUser.profileCompleted = true;
+
+      localStorage.setItem("pasar_pagi_user", JSON.stringify(currentUser));
+      closeProfileSetupModal();
+      updateAuthUI();
+      showToast(`🎉 Profil berhasil dibuat! Selamat datang, <strong>${escapeHtml(currentUser.name)}</strong>. Toko Buah & Sayur kini terbuka!`);
+
+      // Buka Toko Buah & Sayur secara otomatis
+      setTimeout(() => {
+        navigateTo("shop");
+      }, 350);
+    });
+  }
+
+  /* SUBMIT FORM PROFIL CUSTOMER (EDIT) */
+  const profileForm = document.getElementById("profile-form");
+  if (profileForm) {
+    profileForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const nameInput = document.getElementById("profile-name");
+      const ageInput = document.getElementById("profile-age");
+      const wa = document.getElementById("profile-wa").value.trim();
+      const addr = document.getElementById("profile-address").value.trim();
+
+      if (nameInput && nameInput.value.trim()) {
+        currentUser.name = nameInput.value.trim();
+      }
+      if (ageInput && !isNaN(parseInt(ageInput.value, 10))) {
+        currentUser.age = parseInt(ageInput.value, 10);
+      }
+      if (editSelectedAvatar) {
+        currentUser.avatarEmoji = editSelectedAvatar.emoji;
+        currentUser.avatarName = editSelectedAvatar.name;
+        currentUser.avatarBg = editSelectedAvatar.bg;
+        currentUser.avatar = getAvatarDataUri(editSelectedAvatar.emoji, editSelectedAvatar.bg);
+      }
+      if (editSelectedProduces && editSelectedProduces.size > 0) {
+        currentUser.favoriteProduce = Array.from(editSelectedProduces);
+      }
+
+      currentUser.phone = wa;
+      currentUser.address = addr;
+      localStorage.setItem("pasar_pagi_user", JSON.stringify(currentUser));
+      closeProfileModal();
+      updateAuthUI();
+      showToast("Data profil dan alamat pengiriman berhasil diperbarui!");
+
+      // Update field checkout jika sedang terbuka
+      const checkoutPhone = document.getElementById("checkout-phone");
+      const checkoutAddr = document.getElementById("checkout-address");
+      if (checkoutPhone) checkoutPhone.value = wa;
+      if (checkoutAddr) checkoutAddr.value = addr;
+    });
+  }
+
+  /* SUBMIT FORM LOGIN GOOGLE KUSTOM */
+  const customGoogleForm = document.getElementById("custom-google-form");
+  if (customGoogleForm) {
+    customGoogleForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nameInput = document.getElementById("custom-google-name");
+      const emailInput = document.getElementById("custom-google-email");
+      const name = nameInput ? nameInput.value.trim() : "";
+      const email = emailInput ? emailInput.value.trim() : "";
+      if (!name || !email) return;
+
+      loginUser({
+        name,
+        email,
+        phone: currentUser?.phone || "",
+        address: currentUser?.address || "",
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2e7d32&color=fff`
+      });
+      closeLoginModal();
+      showToast(`Login Google berhasil sebagai <strong>${escapeHtml(name)}</strong>!`);
+    });
+  }
 
   /* EVENT INPUT: VOLUME SLIDER (DRAG MULUS REAL-TIME 60 FPS) */
   document.addEventListener("input", (e) => {
@@ -1280,11 +2650,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ESCAPE KEY LISTENER */
+  /* ESCAPE KEY LISTENER (TUTUP SEMUA MODAL YANG TERBUKA) */
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      if (reviewModal.classList.contains("open")) closeReview();
-      if (successModal.classList.contains("open")) closeSuccessModal();
+      if (reviewModal && reviewModal.classList.contains("open")) closeReview();
+      if (successModal && successModal.classList.contains("open")) closeSuccessModal();
+      if (loginModal && loginModal.classList.contains("open")) closeLoginModal();
+      if (profileSetupModal && profileSetupModal.classList.contains("open")) closeProfileSetupModal();
+      if (profileModal && profileModal.classList.contains("open")) closeProfileModal();
+      if (ordersModal && ordersModal.classList.contains("open")) closeOrdersModal();
+      closeUserDropdown();
     }
   });
 
@@ -1298,7 +2673,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* INISIALISASI AWAL */
+  /* INISIALISASI AWAL APLIKASI */
+  // Inisialisasi Auth & Pembayaran
+  updateAuthUI();
+  initGoogleAuth();
+  selectBank("bca");
+  selectPaymentMethod("qris");
+
+  // Direct Click Binding untuk Keandalan Checkout & Modal Pembayaran
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openReview();
+    });
+  }
+  const reviewConfirmBtn = document.getElementById("review-confirm");
+  if (reviewConfirmBtn) {
+    reviewConfirmBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      placeOrder();
+    });
+  }
+  const reviewBackBtn = document.getElementById("review-back");
+  if (reviewBackBtn) {
+    reviewBackBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeReview();
+    });
+  }
+  const modalCloseBtn = document.getElementById("modal-close-btn");
+  if (modalCloseBtn) {
+    modalCloseBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeReview();
+    });
+  }
+
   const initialHash = window.location.hash.toLowerCase();
   if (initialHash === "#toko" || initialHash === "#shop") {
     navigateTo("shop");
@@ -1306,6 +2716,7 @@ document.addEventListener("DOMContentLoaded", () => {
     navigateTo("home");
   }
 
+  // Render Konten
   renderHomeFeatured();
   renderProducts();
   renderCart();
