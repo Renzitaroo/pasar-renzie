@@ -1129,29 +1129,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const clientId = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_GOOGLE_CLIENT_ID) || "89040021867-5ofg2iqgp2fa53t1v2ad3mpm1dec1rv2.apps.googleusercontent.com";
     const realGisWrapper = document.getElementById("google-gis-real-wrapper");
     const realGisTarget = document.getElementById("google-gis-button-target");
+    const actionBtn = document.getElementById("btn-google-official-action");
 
-    if (window.google && window.google.accounts && clientId && !clientId.includes("your-google-client-id") && clientId.includes(".apps.googleusercontent.com")) {
+    if (window.google && window.google.accounts && clientId && !clientId.includes("your-google-client-id")) {
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: handleGoogleCredentialResponse
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
         });
+
         if (realGisTarget) {
           realGisTarget.innerHTML = "";
           window.google.accounts.id.renderButton(realGisTarget, {
             theme: "outline",
             size: "large",
-            width: 280,
-            text: "signin_with",
-            shape: "rectangular"
+            width: 320,
+            text: "continue_with",
+            shape: "rectangular",
+            logo_alignment: "left"
           });
           if (realGisWrapper) realGisWrapper.style.display = "flex";
+          // Jika render button resmi Google berhasil muncul, sembunyikan fallback action button
+          setTimeout(() => {
+            if (realGisTarget.children.length > 0 && actionBtn) {
+              actionBtn.style.display = "none";
+            }
+          }, 300);
         }
+
+        // Tampilkan prompt One-Tap otomatis jika didukung browser
+        window.google.accounts.id.prompt();
       } catch (err) {
         console.warn("Inisialisasi Google Identity Services error:", err);
+        if (actionBtn) actionBtn.style.display = "flex";
       }
     } else {
-      if (realGisWrapper) realGisWrapper.style.display = "none";
+      if (actionBtn) actionBtn.style.display = "flex";
     }
   }
 
@@ -1159,17 +1174,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!response || !response.credential) return;
     const payload = parseJwt(response.credential);
     if (payload) {
+      console.log("[GOOGLE_LOGIN_SUCCESS]", payload.name, payload.email);
+      const isExisting = currentUser && currentUser.email === payload.email;
+
       loginUser({
         name: payload.name || "Pelanggan Google",
         email: payload.email || "",
         avatar: payload.picture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80",
-        phone: currentUser?.phone || "",
-        address: currentUser?.address || ""
+        phone: isExisting ? currentUser.phone : "",
+        address: isExisting ? currentUser.address : "",
+        profileCompleted: isExisting ? (currentUser.profileCompleted ?? false) : false
       });
+
       closeLoginModal();
-      showToast(`Selamat datang, <strong>${escapeHtml(payload.name || 'Pelanggan')}</strong>!`);
+
+      if (!isExisting || !currentUser.profileCompleted) {
+        showToast(`Halo <strong>${escapeHtml(payload.name || 'Pelanggan')}</strong>! Silakan lengkapi profil toko Anda.`);
+        openProfileSetupModal();
+      } else {
+        navigateTo("shop");
+        showToast(`Selamat datang kembali, <strong>${escapeHtml(payload.name)}</strong>!`);
+      }
     }
   }
+
 
   function parseJwt(token) {
     try {
@@ -2277,6 +2305,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // Tutup Modal Login
     if (target.id === "login-modal-close" || target.closest("#login-modal-close") || target === loginModal) {
       closeLoginModal();
+      return;
+    }
+
+    // Tombol Resmi Google Sign-In Action (Lanjutkan dengan Akun Google)
+    if (target.id === "btn-google-official-action" || target.closest("#btn-google-official-action")) {
+      const realTargetBtn = document.querySelector("#google-gis-button-target div[role='button'], #google-gis-button-target iframe");
+      if (realTargetBtn) {
+        realTargetBtn.click();
+      } else if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.prompt();
+      } else {
+        const form = document.getElementById("custom-google-form");
+        if (form) form.style.display = "flex";
+        showToast("Layanan Google sedang dimuat, Anda juga dapat memasukkan Gmail secara langsung.");
+      }
       return;
     }
 

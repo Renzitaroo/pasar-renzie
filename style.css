@@ -2926,10 +2926,81 @@ body {
   transform: translateX(4px);
 }
 
+.google-login-hero-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.btn-google-official-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.95rem 1.2rem;
+  background: #ffffff;
+  border: 1.5px solid #dadce0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(60, 64, 67, 0.08);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+}
+
+.btn-google-official-action:hover {
+  background: #f8fbff;
+  border-color: #4285F4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(66, 133, 244, 0.2);
+}
+
+.btn-google-official-action:hover .google-btn-arrow {
+  transform: translateX(4px);
+  color: #1a73e8;
+}
+
+.google-login-trust-hint {
+  font-size: 0.75rem;
+  color: var(--brown-sub);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
 .google-gis-real-wrapper {
   display: flex;
   justify-content: center;
-  margin: 0.5rem 0;
+  width: 100%;
+  margin: 0.25rem 0;
+}
+
+.google-gis-real-wrapper iframe,
+.google-gis-real-wrapper div {
+  margin: 0 auto;
+}
+
+.dev-quick-test-details {
+  margin-top: 1rem;
+  border-top: 1px solid var(--line-light);
+  padding-top: 0.6rem;
+}
+
+.dev-quick-test-summary {
+  font-size: 0.75rem;
+  color: var(--brown-sub);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dev-quick-test-summary:hover {
+  color: var(--olive);
 }
 
 .custom-google-box {

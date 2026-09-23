@@ -589,75 +589,88 @@
       </div>
 
       <div class="login-body">
-        <!-- Google Sign-In Section -->
+        <!-- Google Sign-In Section (Resmi untuk Setiap Pengunjung) -->
         <div class="google-auth-section" id="google-auth-section">
-          <!-- Tombol Akun Google Utama Pengguna (Guntur Rizqi) -->
-          <button type="button" class="btn-google-account-primary" id="btn-login-guntur" title="Masuk langsung dengan akun Google Guntur Rizqi">
-            <div class="google-btn-icon-wrap">
-              <svg width="20" height="20" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-              </svg>
+          <div class="google-login-hero-box">
+            <!-- Kontainer GIS SDK Asli Google -->
+            <div class="google-gis-real-wrapper" id="google-gis-real-wrapper">
+              <div id="google-gis-button-target"></div>
             </div>
-            <div class="google-btn-text-wrap">
-              <span class="google-btn-action">Lanjutkan sebagai Guntur Rizqi</span>
-              <span class="google-btn-email">gunturrizqi444@gmail.com</span>
-            </div>
-            <i class="fas fa-check-circle google-btn-verified"></i>
-          </button>
 
-          <!-- Kontainer GIS SDK Asli (Disediakan jika VITE_GOOGLE_CLIENT_ID terpasang) -->
-          <div class="google-gis-real-wrapper" id="google-gis-real-wrapper" style="display: none;">
-            <div id="google-gis-button-target"></div>
+            <!-- Tombol Interaktif Google Sign-In (Fallback / Direct Action) -->
+            <button type="button" class="btn-google-official-action" id="btn-google-official-action" title="Login dengan Akun Google Anda">
+              <div class="google-btn-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+              </div>
+              <div class="google-btn-text-wrap">
+                <span class="google-btn-action">Lanjutkan dengan Akun Google</span>
+                <span class="google-btn-email">Pilih akun Google / Gmail pribadi Anda</span>
+              </div>
+              <i class="fas fa-chevron-right google-btn-arrow"></i>
+            </button>
+
+            <p class="google-login-trust-hint">
+              <i class="fas fa-shield-halved"></i> Masuk aman tanpa kata sandi via Google Identity Services
+            </p>
           </div>
 
-          <!-- Pilihan Masuk Akun Google Lainnya -->
+          <!-- Pilihan Masuk Akun Google Lainnya / Manual -->
           <div class="custom-google-box">
             <button type="button" class="btn-toggle-custom-google" id="btn-toggle-custom-google">
-              <i class="fab fa-google"></i> Masuk dengan Akun Google Lain <i class="fas fa-chevron-down" id="toggle-custom-google-icon"></i>
+              <i class="fas fa-envelope"></i> Atau masuk dengan Gmail lain <i class="fas fa-chevron-down" id="toggle-custom-google-icon"></i>
             </button>
             <form class="custom-google-form" id="custom-google-form" style="display: none;">
-              <input type="text" class="custom-google-input" id="custom-google-name" placeholder="Nama Lengkap (cth. Guntur Rizqi)" required>
-              <input type="email" class="custom-google-input" id="custom-google-email" placeholder="Alamat Gmail (cth. nama@gmail.com)" required>
+              <input type="text" class="custom-google-input" id="custom-google-name" placeholder="Nama Lengkap Anda" required>
+              <input type="email" class="custom-google-input" id="custom-google-email" placeholder="Alamat Gmail Anda (nama@gmail.com)" required>
               <button type="submit" class="btn-submit-custom-google">
-                <i class="fas fa-right-to-bracket"></i> Masuk dengan Akun Ini
+                <i class="fas fa-right-to-bracket"></i> Masuk Sekarang
               </button>
             </form>
           </div>
         </div>
 
-        <div class="login-divider-text">
-          <span>atau uji coba instan (Mode Demo Cepat)</span>
-        </div>
-
-        <div class="demo-login-box">
-          <p class="demo-login-tip">Pilih profil pelanggan simulasi untuk mencoba fitur akun langsung:</p>
-          <div class="demo-user-cards">
-            <button class="demo-user-btn" data-demo-name="Budi Santoso" data-demo-email="budi.santoso@gmail.com" data-demo-phone="081234567890" data-demo-address="Jl. Melati No. 12, Pamulang Barat, Tangerang Selatan">
-              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" alt="Budi" class="demo-avatar">
-              <div class="demo-user-info">
-                <strong>Budi Santoso</strong>
-                <span>budi.santoso@gmail.com</span>
-              </div>
-              <i class="fas fa-arrow-right"></i>
-            </button>
-            <button class="demo-user-btn" data-demo-name="Siti Rahma" data-demo-email="siti.rahma@gmail.com" data-demo-phone="085712345678" data-demo-address="Kompleks Griya Asri Blok C4 No. 8, Ciputat, Tangerang Selatan">
-              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80" alt="Siti" class="demo-avatar">
-              <div class="demo-user-info">
-                <strong>Siti Rahma</strong>
-                <span>siti.rahma@gmail.com</span>
-              </div>
-              <i class="fas fa-arrow-right"></i>
-            </button>
+        <!-- Mode Pengujian Cepat Developer (Tersembunyi di bawah) -->
+        <details class="dev-quick-test-details">
+          <summary class="dev-quick-test-summary">
+            <i class="fas fa-vial"></i> Mode Simulasi Cepat (Khusus Testing)
+          </summary>
+          <div class="demo-login-box">
+            <p class="demo-login-tip">Pilih profil simulasi untuk mencoba fitur akun langsung:</p>
+            <div class="demo-user-cards">
+              <button type="button" class="btn-google-account-primary" id="btn-login-guntur" style="margin-bottom: 0.5rem;">
+                <div class="google-btn-icon-wrap">
+                  <i class="fas fa-user-gear"></i>
+                </div>
+                <div class="google-btn-text-wrap">
+                  <span class="google-btn-action">Login Instan: Guntur Rizqi</span>
+                  <span class="google-btn-email">gunturrizqi444@gmail.com (Testing)</span>
+                </div>
+              </button>
+              <button class="demo-user-btn" data-demo-name="Budi Santoso" data-demo-email="budi.santoso@gmail.com" data-demo-phone="081234567890" data-demo-address="Jl. Melati No. 12, Pamulang Barat, Tangerang Selatan">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" alt="Budi" class="demo-avatar">
+                <div class="demo-user-info">
+                  <strong>Budi Santoso (Demo)</strong>
+                  <span>budi.santoso@gmail.com</span>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <button class="demo-user-btn" data-demo-name="Siti Rahma" data-demo-email="siti.rahma@gmail.com" data-demo-phone="085712345678" data-demo-address="Kompleks Griya Asri Blok C4 No. 8, Ciputat, Tangerang Selatan">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80" alt="Siti" class="demo-avatar">
+                <div class="demo-user-info">
+                  <strong>Siti Rahma (Demo)</strong>
+                  <span>siti.rahma@gmail.com</span>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
           </div>
-        </div>
+        </details>
 
-        <div class="login-env-hint">
-          <i class="fas fa-circle-info"></i>
-          <span>Pengembang: Untuk mengaktifkan Google Sign-In asli, cantumkan <code>VITE_GOOGLE_CLIENT_ID</code> di file <code>.env</code> Anda.</span>
-        </div>
       </div>
     </div>
   </div>
