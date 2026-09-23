@@ -435,6 +435,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const mobileCartBar = document.getElementById("mobile-cart-bar");
   const mobileCartItems = document.getElementById("mobile-cart-items");
   const mobileCartTotal = document.getElementById("mobile-cart-total");
+  const mobileHeaderCart = document.getElementById("mobile-header-cart");
+  const mobileHeaderCartBadge = document.getElementById("mobile-header-cart-badge");
+  const mobileBottomNav = document.getElementById("mobile-bottom-nav");
+  const bnavHome = document.getElementById("bnav-home");
+  const bnavShop = document.getElementById("bnav-shop");
+  const bnavCart = document.getElementById("bnav-cart");
+  const bnavCartBadge = document.getElementById("bnav-cart-badge");
+  const bnavUser = document.getElementById("bnav-user");
+  const bnavAvatarImg = document.getElementById("bnav-avatar-img");
+  const bnavUserIcon = document.getElementById("bnav-user-icon");
+  const bnavUserLabel = document.getElementById("bnav-user-label");
 
   // ============================================================
   //  STATE: AUTENTIKASI CUSTOMER & RIWAYAT PESANAN
@@ -664,6 +675,8 @@ document.addEventListener("DOMContentLoaded", () => {
       pageShopEl.classList.add("active");
       navHomeBtn.classList.remove("active");
       navShopBtn.classList.add("active");
+      if (bnavHome) bnavHome.classList.remove("active");
+      if (bnavShop) bnavShop.classList.add("active");
       window.location.hash = "#toko";
 
       if (scrollTarget === "cart") {
@@ -676,6 +689,8 @@ document.addEventListener("DOMContentLoaded", () => {
       pageHomeEl.classList.add("active");
       navShopBtn.classList.remove("active");
       navHomeBtn.classList.add("active");
+      if (bnavHome) bnavHome.classList.add("active");
+      if (bnavShop) bnavShop.classList.remove("active");
       window.location.hash = "#beranda";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -917,6 +932,16 @@ document.addEventListener("DOMContentLoaded", () => {
         checkoutBtn.disabled = true;
         checkoutBtn.classList.add("disabled");
       }
+    }
+
+    // Badge keranjang di Bottom Nav Dock & Header Mobile
+    if (bnavCartBadge) {
+      bnavCartBadge.textContent = totalCount;
+      bnavCartBadge.style.display = totalCount > 0 ? "flex" : "none";
+    }
+    if (mobileHeaderCartBadge) {
+      mobileHeaderCartBadge.textContent = totalCount;
+      mobileHeaderCartBadge.style.display = totalCount > 0 ? "flex" : "none";
     }
 
     // Floating cart bar di mobile
@@ -1283,6 +1308,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (menuBadge) {
       menuBadge.textContent = userOrders.length;
+    }
+
+    // Update Mobile Bottom Nav User Button
+    if (bnavUserLabel) {
+      if (currentUser) {
+        bnavUserLabel.textContent = (currentUser.name || "Akun").split(" ")[0];
+        if (bnavAvatarImg) {
+          if (currentUser.avatarEmoji) {
+            bnavAvatarImg.src = getAvatarDataUri(currentUser.avatarEmoji, currentUser.avatarBg || "#eaf6ea");
+          } else if (currentUser.avatar) {
+            bnavAvatarImg.src = currentUser.avatar;
+          } else {
+            bnavAvatarImg.src = getAvatarDataUri("🍎", "#fde8e8");
+          }
+          bnavAvatarImg.style.display = "block";
+        }
+        if (bnavUserIcon) bnavUserIcon.style.display = "none";
+      } else {
+        bnavUserLabel.textContent = "Masuk";
+        if (bnavAvatarImg) bnavAvatarImg.style.display = "none";
+        if (bnavUserIcon) bnavUserIcon.style.display = "block";
+      }
     }
   }
 
@@ -2195,9 +2242,52 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Mobile Cart Bar -> buka toko & scroll ke keranjang
-    if (target.id === "mobile-cart-btn") {
-      navigateTo("shop", "cart");
+    // Mobile Floating Cart Bar -> buka toko / scroll ke keranjang
+    if (target.id === "mobile-cart-btn" || target.closest("#mobile-cart-btn") || target.id === "mobile-cart-bar" || target.closest("#mobile-cart-bar")) {
+      if (currentPage === "shop") {
+        scrollToCart();
+      } else {
+        navigateTo("shop", "cart");
+      }
+      return;
+    }
+
+    // Mobile Header Quick Cart Button
+    if (target.id === "mobile-header-cart" || target.closest("#mobile-header-cart")) {
+      if (currentPage === "shop") {
+        scrollToCart();
+      } else {
+        navigateTo("shop", "cart");
+      }
+      return;
+    }
+
+    // Mobile Bottom Navigation Dock Items
+    if (target.id === "bnav-home" || target.closest("#bnav-home")) {
+      navigateTo("home");
+      return;
+    }
+
+    if (target.id === "bnav-shop" || target.closest("#bnav-shop")) {
+      navigateTo("shop");
+      return;
+    }
+
+    if (target.id === "bnav-cart" || target.closest("#bnav-cart")) {
+      if (currentPage === "shop") {
+        scrollToCart();
+      } else {
+        navigateTo("shop", "cart");
+      }
+      return;
+    }
+
+    if (target.id === "bnav-user" || target.closest("#bnav-user")) {
+      if (currentUser) {
+        openProfileModal();
+      } else {
+        openLoginModal();
+      }
       return;
     }
 
