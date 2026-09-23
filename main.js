@@ -538,7 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const MPG_CONFIG = {
     backendUrl: "http://localhost:3001/api/checkout",
     directGatewayUrl: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_MPG_GATEWAY_URL) || "https://paymentgateway.daeroom.my.id",
-    apiKey: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_MPG_API_KEY) || ""
+    apiKey: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_MPG_API_KEY) || "mpg_live_f89a3c10b7d24e6a8e5c3b1a9f0d7e2c"
   };
 
   /**
@@ -1126,7 +1126,7 @@ document.addEventListener("DOMContentLoaded", () => {
      ============================================================ */
 
   function initGoogleAuth() {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    const clientId = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_GOOGLE_CLIENT_ID) || "89040021867-5ofg2iqgp2fa53t1v2ad3mpm1dec1rv2.apps.googleusercontent.com";
     const realGisWrapper = document.getElementById("google-gis-real-wrapper");
     const realGisTarget = document.getElementById("google-gis-button-target");
 
