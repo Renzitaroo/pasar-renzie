@@ -285,7 +285,12 @@
         <div class="cart-header">
           <div class="cart-header-top">
             <h2>Keranjang Kamu</h2>
-            <span class="cart-badge-count" id="sidebar-cart-badge">0 item</span>
+            <div class="cart-header-actions">
+              <span class="cart-badge-count" id="sidebar-cart-badge">0 item</span>
+              <button class="cart-drawer-close-btn" id="cart-drawer-close-btn" aria-label="Tutup Keranjang" title="Tutup">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
           </div>
           <p class="cart-sub">Barang pilihan segar siap diantar</p>
         </div>
@@ -319,6 +324,8 @@
           </button>
         </div>
       </aside>
+      <!-- CART DRAWER BACKDROP (MOBILE ONLY) -->
+      <div class="cart-drawer-backdrop" id="cart-drawer-overlay"></div>
     </main>
   </div>
 

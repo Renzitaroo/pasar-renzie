@@ -685,6 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } else {
+      closeCartDrawer();
       pageShopEl.classList.remove("active");
       pageHomeEl.classList.add("active");
       navShopBtn.classList.remove("active");
@@ -1755,6 +1756,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* MODAL REVIEW CHECKOUT */
   function openReview() {
+    closeCartDrawer();
     if (Object.keys(cart).length === 0) {
       showToast("Keranjang kamu masih kosong.");
       return;
@@ -2117,10 +2119,30 @@ document.addEventListener("DOMContentLoaded", () => {
     return div.innerHTML;
   }
 
-  function scrollToCart() {
+  function openCartDrawer() {
     const sidebar = document.getElementById("cart-sidebar");
-    if (sidebar) {
-      sidebar.scrollIntoView({ behavior: "smooth", block: "start" });
+    const overlay = document.getElementById("cart-drawer-overlay");
+    if (sidebar) sidebar.classList.add("drawer-open");
+    if (overlay) overlay.classList.add("drawer-open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeCartDrawer() {
+    const sidebar = document.getElementById("cart-sidebar");
+    const overlay = document.getElementById("cart-drawer-overlay");
+    if (sidebar) sidebar.classList.remove("drawer-open");
+    if (overlay) overlay.classList.remove("drawer-open");
+    document.body.style.overflow = "";
+  }
+
+  function scrollToCart() {
+    if (window.innerWidth <= 768) {
+      openCartDrawer();
+    } else {
+      const sidebar = document.getElementById("cart-sidebar");
+      if (sidebar) {
+        sidebar.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
   }
 
@@ -2129,6 +2151,12 @@ document.addEventListener("DOMContentLoaded", () => {
      ============================================================ */
 
   document.addEventListener("click", (event) => {
+    // Tutup drawer keranjang jika backdrop di-klik
+    if (event.target && event.target.id === "cart-drawer-overlay") {
+      closeCartDrawer();
+      return;
+    }
+
     // 1. Tangani penutupan jika pengguna klik langsung di luar kartu (pada latar belakang gelap / backdrop)
     if (event.target && event.target.classList && event.target.classList.contains("modal-overlay")) {
       if (event.target === reviewModal) closeReview();
@@ -2142,6 +2170,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const target = event.target.closest("button, .perk-coupon, .dept-pill, .payment-option, #clear-search, #reset-filter-btn, #brand-logo, .preset-chip, .volume-step-btn");
     if (!target) return;
+
+    // Tutup Drawer Keranjang Mobile
+    if (target.id === "cart-drawer-close-btn" || target.closest("#cart-drawer-close-btn")) {
+      closeCartDrawer();
+      return;
+    }
 
     // Navigasi Tabs Navbar
     if (target.id === "nav-home" || target.id === "brand-logo") {
@@ -2786,6 +2820,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ESCAPE KEY LISTENER (TUTUP SEMUA MODAL YANG TERBUKA) */
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
+      closeCartDrawer();
       if (reviewModal && reviewModal.classList.contains("open")) closeReview();
       if (successModal && successModal.classList.contains("open")) closeSuccessModal();
       if (loginModal && loginModal.classList.contains("open")) closeLoginModal();

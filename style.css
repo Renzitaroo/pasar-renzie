@@ -1121,6 +1121,20 @@ body {
   border-radius: 999px;
 }
 
+.cart-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cart-drawer-close-btn {
+  display: none;
+}
+
+.cart-drawer-backdrop {
+  display: none;
+}
+
 .cart-sub {
   margin: 0 0 1.5rem;
   font-size: 0.88rem;
@@ -3698,9 +3712,10 @@ body {
   }
 
   .header .brand-title {
-    font-size: 1.22rem !important;
+    font-size: 1.1rem !important;
     margin: 0;
     line-height: 1.15;
+    white-space: nowrap;
   }
 
   /* TOP NAVBAR HIDDEN ON MOBILE (Handled by Bottom Nav Dock) */
@@ -3713,18 +3728,18 @@ body {
     width: auto !important;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .btn-google-login {
-    padding: 0.45rem 0.75rem;
-    font-size: 0.8rem;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.78rem;
     border-radius: 999px;
   }
 
   .user-chip {
-    padding: 0.35rem 0.65rem;
-    gap: 0.45rem;
+    padding: 0.3rem 0.55rem;
+    gap: 0.35rem;
     border-radius: 999px;
   }
 
@@ -3734,16 +3749,15 @@ body {
   }
 
   .user-chip-name {
-    font-size: 0.82rem;
-    max-width: 90px;
+    font-size: 0.78rem;
+    max-width: 75px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .user-chip-badge {
-    font-size: 0.62rem;
-    padding: 1px 5px;
+    display: none !important;
   }
 
   /* MOBILE QUICK CART IN HEADER */
@@ -3948,30 +3962,12 @@ body {
     gap: 1.5rem;
   }
 
-  /* SHOP HEADER BANNER */
+  /* HIDE BULKY SHOP BANNER ON MOBILE (Immediate Access to Products) */
   .shop-header-banner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1.25rem 1rem;
-    gap: 0.85rem;
-    border-radius: 16px;
+    display: none !important;
   }
 
-  .btn-back-home {
-    padding: 0.45rem 0.85rem;
-    font-size: 0.82rem;
-  }
-
-  .shop-banner-title {
-    font-size: 1.55rem;
-    line-height: 1.15;
-  }
-
-  .shop-banner-sub {
-    font-size: 0.85rem;
-  }
-
-  /* HORIZONTAL FILTER PILLS (SWIPEABLE) */
+  /* HORIZONTAL FILTER PILLS (SWIPEABLE & COMPACT) */
   .department-filter-bar {
     display: flex !important;
     flex-direction: row !important;
@@ -3979,10 +3975,10 @@ body {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 0.5rem;
-    padding: 0.2rem 0.2rem 0.5rem;
+    gap: 0.4rem;
+    padding: 0.1rem 0 0.45rem;
     width: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0.65rem;
   }
 
   .department-filter-bar::-webkit-scrollbar {
@@ -3992,18 +3988,19 @@ body {
   .dept-pill {
     flex: 0 0 auto !important;
     white-space: nowrap;
-    padding: 0.55rem 0.95rem;
-    font-size: 0.82rem;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.78rem;
     border-radius: 999px;
     background: #ffffff;
     box-shadow: 0 1px 4px rgba(66, 48, 32, 0.05);
   }
 
-  /* CATALOG HEADER & SEARCH */
+  /* CATALOG HEADER & SEARCH COMPACT */
   .catalog-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
   }
 
   .catalog-title-wrap {
@@ -4013,296 +4010,486 @@ body {
   }
 
   .catalog-heading {
-    font-size: 1.35rem;
+    font-size: 1.15rem;
+  }
+
+  .catalog-count {
+    font-size: 0.72rem;
   }
 
   .search-box {
     width: 100%;
-    height: 44px;
+    height: 38px;
     border-radius: 999px;
   }
 
   .search-box input {
-    font-size: 0.92rem;
+    font-size: 0.82rem;
   }
 
   .market-note {
-    padding: 0.75rem 0.9rem;
-    font-size: 0.78rem;
-    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
   }
 
   /* ============================================================
-     2-COLUMN PRODUCT GRID (MOBILE E-COMMERCE STANDARD)
+     2-COLUMN PRODUCT GRID (STREAMLINED ~235PX HIGH CARDS)
      ============================================================ */
   .product-section {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.65rem !important;
+    gap: 0.5rem !important;
   }
 
   .product {
-    padding: 0.65rem;
-    border-radius: 14px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    border: 1px solid rgba(224, 214, 202, 0.7) !important;
+    box-shadow: 0 2px 8px rgba(66, 48, 32, 0.04) !important;
+    background: #ffffff !important;
+    min-height: 0 !important;
   }
 
   .product-header-badge {
-    margin-bottom: 0.35rem;
-    gap: 0.3rem;
+    margin-bottom: 0.25rem !important;
+    gap: 0.25rem !important;
   }
 
   .produce-id {
-    font-size: 0.62rem;
+    font-size: 0.58rem !important;
+    padding: 1px 4px !important;
   }
 
   .category-chip {
-    font-size: 0.6rem;
-    padding: 2px 5px;
+    font-size: 0.58rem !important;
+    padding: 1px 4px !important;
   }
 
   .product-image-container {
-    height: 125px;
-    border-radius: 10px;
-    margin-bottom: 0.45rem;
+    height: 105px !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.35rem !important;
   }
 
   .item-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.2rem;
-    margin-bottom: 0.35rem;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.15rem !important;
+    margin-bottom: 0.25rem !important;
   }
 
   .product-title {
-    font-size: 1.05rem;
-    line-height: 1.15;
-    margin: 0;
+    font-size: 0.88rem !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    font-weight: 700 !important;
   }
 
   .product-desc {
-    font-size: 0.7rem;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-top: 0.15rem;
+    display: none !important;
   }
 
   .meta-right {
-    text-align: left;
-    width: 100%;
-    margin-top: 0.2rem;
+    text-align: left !important;
+    width: 100% !important;
+    margin-top: 0.1rem !important;
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
   }
 
   .price {
-    font-size: 1.05rem;
-    font-weight: 800;
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
   }
 
   .price-unit {
-    font-size: 0.65rem;
+    font-size: 0.62rem !important;
   }
 
-  /* COMPACT VOLUME SLIDER ON MOBILE 2-COL */
+  /* COMPACT 3-PILL WEIGHT SELECTOR (HIDE SLIDER TRACK ON MOBILE) */
   .phone-volume-section {
-    padding: 0.35rem 0.45rem;
-    margin-bottom: 0.45rem;
-    border-radius: 10px;
+    padding: 0.2rem 0.25rem !important;
+    margin-bottom: 0.35rem !important;
+    border-radius: 8px !important;
+    background: #fdfaf6 !important;
+    border: 1px solid rgba(224, 214, 202, 0.6) !important;
   }
 
   .volume-header-row {
-    margin-bottom: 0.25rem;
-  }
-
-  .volume-label {
-    font-size: 0.62rem;
-  }
-
-  .volume-quick-weight {
-    font-size: 0.68rem;
-    padding: 1px 5px;
+    display: none !important;
   }
 
   .volume-control-wrap {
-    gap: 4px;
-    margin-bottom: 0.25rem;
-  }
-
-  .volume-step-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.72rem;
-  }
-
-  .volume-capsule-track {
-    height: 28px;
-  }
-
-  .volume-capsule-content {
-    font-size: 0.72rem;
-    gap: 4px;
+    display: none !important;
   }
 
   .volume-preset-chips {
-    gap: 3px;
+    display: flex !important;
+    gap: 3px !important;
+    width: 100% !important;
   }
 
   .preset-chip {
-    padding: 2px 4px;
-    font-size: 0.62rem;
+    flex: 1 1 0 !important;
+    padding: 3px 1px !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    border-radius: 5px !important;
+    min-width: 0 !important;
+    border: 1px solid var(--line) !important;
+    background: #ffffff !important;
+    color: var(--brown-sub) !important;
+    line-height: 1.2 !important;
+  }
+
+  .preset-chip.active {
+    background: var(--olive) !important;
+    color: #ffffff !important;
+    border-color: var(--olive) !important;
+  }
+
+  /* Sembunyikan chip 3 kg di mobile agar 500 gr, 1 kg, 2 kg presisi 1 baris tanpa wrap */
+  .preset-chip[data-weight="3.0"] {
+    display: none !important;
   }
 
   .wholesale-saving-badge {
-    font-size: 0.62rem;
-    padding: 2px 5px;
-    margin-top: 2px;
+    font-size: 0.58rem !important;
+    padding: 1px 4px !important;
+    margin-top: 1px !important;
+    line-height: 1.2 !important;
   }
 
   .product-footer-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.35rem;
-    padding-top: 0.45rem;
-    margin-top: auto;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.25rem !important;
+    padding-top: 0.25rem !important;
+    margin-top: auto !important;
   }
 
   .stock-status {
-    font-size: 0.68rem;
-    justify-content: center;
+    font-size: 0.62rem !important;
+    justify-content: center !important;
   }
 
   .btn-add-variant {
-    width: 100%;
-    justify-content: center;
-    padding: 0.45rem 0.5rem;
-    font-size: 0.78rem;
-    border-radius: 8px;
-    min-height: 38px;
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.35rem 0.4rem !important;
+    font-size: 0.74rem !important;
+    border-radius: 6px !important;
+    min-height: 32px !important;
   }
 
   .quantity-controls {
-    justify-content: center;
-    width: 100%;
+    justify-content: center !important;
+    width: 100% !important;
   }
 
-  /* HOME PAGE WELCOME HERO & PERKS */
+  /* ============================================================
+     HOME PAGE WELCOME HERO & PERKS (COMPACT & PRECISE)
+     ============================================================ */
   .welcome-hero {
-    padding: 2rem 1.15rem 1.65rem;
-    border-radius: 20px;
-    margin-bottom: 2rem;
+    padding: 1.25rem 0.95rem 1.15rem !important;
+    border-radius: 16px !important;
+    margin-bottom: 1.25rem !important;
   }
 
   .welcome-tag {
-    font-size: 0.72rem;
-    padding: 0.35rem 0.75rem;
+    font-size: 0.68rem !important;
+    padding: 0.25rem 0.6rem !important;
+    margin-bottom: 0.35rem !important;
   }
 
   .welcome-title {
-    font-size: 2.1rem;
-    line-height: 1.15;
-    margin: 0.75rem 0;
+    font-size: 1.65rem !important;
+    line-height: 1.15 !important;
+    margin: 0.35rem 0 0.5rem !important;
   }
 
   .welcome-lead {
-    font-size: 0.92rem;
-    line-height: 1.5;
+    font-size: 0.8rem !important;
+    line-height: 1.4 !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0.85rem !important;
   }
 
   .welcome-cta-group {
-    flex-direction: column;
-    gap: 0.65rem;
-    width: 100%;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
   }
 
   .btn-hero-primary,
   .btn-hero-secondary {
-    width: 100%;
-    justify-content: center;
-    padding: 0.85rem 1.1rem;
-    font-size: 0.92rem;
-    border-radius: 14px;
+    flex: 1 1 50% !important;
+    width: auto !important;
+    justify-content: center !important;
+    padding: 0.65rem 0.5rem !important;
+    font-size: 0.78rem !important;
+    border-radius: 10px !important;
+    text-align: center !important;
   }
 
+  /* 2X2 TIGHT PERKS GRID (CUTS VERTICAL STACK) */
   .welcome-perks {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    margin-top: 1.8rem;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+    margin-top: 1rem !important;
   }
 
   .perk-item {
-    padding: 0.9rem;
-    border-radius: 14px;
+    padding: 0.6rem 0.65rem !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.3rem !important;
   }
 
-  /* FEATURED FRUITS / SAYUR GRID ON HOME PAGE (2-COL) */
+  .perk-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .perk-text strong {
+    font-size: 0.75rem !important;
+    display: block;
+    line-height: 1.2;
+  }
+
+  .perk-text span {
+    font-size: 0.62rem !important;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* HORIZONTAL SWIPE SHELVES FOR FEATURED (CUTS FATIGUING SCROLL) */
   .featured-fruits-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
     gap: 0.65rem !important;
-    margin-bottom: 1.5rem;
+    padding: 0.2rem 0.2rem 0.65rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .featured-fruits-grid::-webkit-scrollbar {
+    display: none;
   }
 
   .featured-fruit-card {
-    border-radius: 14px;
+    flex: 0 0 160px !important;
+    scroll-snap-align: start;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
   }
 
   .featured-img-wrap {
-    height: 125px;
+    height: 100px !important;
   }
 
   .featured-body {
-    padding: 0.65rem;
+    padding: 0.55rem !important;
+  }
+
+  .featured-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.15rem !important;
+    margin-bottom: 0.25rem !important;
   }
 
   .featured-title {
-    font-size: 1.05rem;
+    font-size: 0.88rem !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .featured-desc {
+    display: none !important;
+  }
+
+  .featured-price-wrap {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
   }
 
   .featured-price {
-    font-size: 1.05rem;
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+  }
+
+  .featured-unit {
+    font-size: 0.62rem !important;
   }
 
   .featured-footer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.35rem;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.25rem !important;
+    margin-top: auto !important;
   }
 
   .btn-buy-featured {
-    width: 100%;
-    justify-content: center;
-    padding: 0.45rem 0.5rem;
-    font-size: 0.78rem;
-    min-height: 38px;
-    border-radius: 8px;
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.35rem 0.45rem !important;
+    font-size: 0.74rem !important;
+    min-height: 32px !important;
+    border-radius: 7px !important;
   }
 
-  /* CART SIDEBAR ON MOBILE */
+  /* NATIVE MOBILE SLIDE-UP CART BOTTOM SHEET DRAWER */
   .cart-sidebar {
-    padding: 1.15rem;
-    border-radius: 18px;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: 85vh !important;
+    width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    z-index: 1060 !important;
+    background: #ffffff !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.32) !important;
+    transform: translateY(105%) !important;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    overflow: hidden !important;
+  }
+
+  .cart-sidebar::before {
+    content: "";
+    display: block;
+    width: 38px;
+    height: 5px;
+    background: #ddcebe;
+    border-radius: 999px;
+    margin: 0 auto 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .cart-sidebar.drawer-open {
+    transform: translateY(0) !important;
+  }
+
+  .cart-drawer-backdrop {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+    z-index: 1050 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.28s ease !important;
+  }
+
+  .cart-drawer-backdrop.drawer-open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .cart-drawer-close-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f4ece2;
+    border: none;
+    color: #5a4635;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease;
+  }
+
+  .cart-drawer-close-btn:active {
+    background: #e6dacd;
   }
 
   .cart-header-top h2 {
-    font-size: 1.35rem;
+    font-size: 1.25rem !important;
+    margin: 0;
+  }
+
+  .cart-sub {
+    margin: 0 0 0.75rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .cart-details {
+    flex: 1 1 auto;
+    overflow-y: auto !important;
+    max-height: 36vh !important;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
   }
 
   .cart-item {
-    padding: 0.75rem 0;
+    padding: 0.55rem 0 !important;
   }
 
   .cart-item-name {
-    font-size: 0.88rem;
+    font-size: 0.82rem !important;
+  }
+
+  .cart-footer {
+    flex-shrink: 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--line);
+    margin-top: 0.35rem;
+  }
+
+  .cart-breakdown {
+    margin: 0.4rem 0 !important;
+    padding: 0.55rem 0.75rem !important;
+    border-radius: 10px !important;
   }
 
   .checkout-button {
-    height: 48px;
-    font-size: 0.95rem;
-    border-radius: 12px;
+    height: 46px !important;
+    font-size: 0.92rem !important;
+    border-radius: 12px !important;
   }
 
   /* ============================================================
@@ -4432,16 +4619,30 @@ body {
 
 /* ULTRA SMALL SCREENS (<= 380px) */
 @media (max-width: 380px) {
+  .header .brand-title {
+    font-size: 1.02rem !important;
+  }
+  .btn-google-login {
+    padding: 0.35rem 0.55rem !important;
+    font-size: 0.72rem !important;
+  }
+  .btn-google-login span {
+    font-size: 0.72rem !important;
+  }
   .product-image-container {
-    height: 110px;
+    height: 95px !important;
   }
   .product-title {
-    font-size: 0.95rem;
+    font-size: 0.82rem !important;
   }
   .price {
-    font-size: 0.95rem;
+    font-size: 0.88rem !important;
+  }
+  .preset-chip {
+    font-size: 0.58rem !important;
+    padding: 2px 1px !important;
   }
   .bnav-label {
-    font-size: 0.62rem;
+    font-size: 0.62rem !important;
   }
 }
