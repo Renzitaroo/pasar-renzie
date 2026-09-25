@@ -1,4 +1,4 @@
-# 🌿 Pasar Renzie — Modern Fresh Produce E-Commerce & Payment Engine
+# 🌿 Pasar Renzie — Modern Fresh Produce E-Commerce 
 
 > Platform belanja buah & sayur segar organik dengan autentikasi Google Identity, onboarding maskot lucu, slider takaran volume smartphone, serta pembayaran QRIS Dinamis Mandiri 0% MDR tanpa perantara pihak ketiga.
 
