@@ -56,8 +56,8 @@ body {
 }
 
 @keyframes fadeInView {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* HEADER & NAVBAR */
@@ -211,6 +211,7 @@ body {
   font-weight: 700;
   line-height: 1.05;
   color: var(--brown);
+  text-wrap: balance;
 }
 
 .welcome-lead {
@@ -373,6 +374,7 @@ body {
   font-size: clamp(2.2rem, 4vw, 3rem);
   font-weight: 700;
   margin: 0 0 0.6rem;
+  text-wrap: balance;
 }
 
 .section-sub {
@@ -3662,9 +3664,14 @@ body {
 /* SMARTPHONE & MOBILE APP BAR (<= 768px) */
 @media (max-width: 768px) {
   /* BODY & SAFE CLEARANCE */
+  html,
   body {
-    padding: 0 0 calc(75px + env(safe-area-inset-bottom, 0px)) 0 !important;
-    overflow-x: hidden;
+    max-width: 100vw;
+    overflow-x: hidden !important;
+    position: relative;
+  }
+  body {
+    padding: 0 0 calc(140px + env(safe-area-inset-bottom, 0px)) 0 !important;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -3760,23 +3767,9 @@ body {
     display: none !important;
   }
 
-  /* MOBILE QUICK CART IN HEADER */
+  /* MOBILE QUICK CART IN HEADER (Hidden on mobile to avoid 3x cart clutter - bottom nav + floating bar handle this) */
   .mobile-header-cart {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1px solid var(--line);
-    color: var(--brown);
-    font-size: 0.95rem;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(66, 48, 32, 0.06);
-    flex-shrink: 0;
-    transition: transform 0.15s ease, background-color 0.15s ease;
+    display: none !important;
   }
 
   .mobile-header-cart:active {
@@ -3957,6 +3950,13 @@ body {
     padding: 0 0.85rem;
   }
 
+  .store-layout,
+  .products-area {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
   .store-layout {
     grid-template-columns: 1fr !important;
     gap: 1.5rem;
@@ -3978,6 +3978,8 @@ body {
     gap: 0.4rem;
     padding: 0.1rem 0 0.45rem;
     width: 100%;
+    max-width: 100% !important;
+    box-sizing: border-box;
     margin-bottom: 0.65rem;
   }
 
@@ -4001,6 +4003,10 @@ body {
     align-items: stretch;
     gap: 0.5rem;
     margin-bottom: 0.6rem;
+    width: 100%;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 0.85rem 0.95rem !important;
   }
 
   .catalog-title-wrap {
@@ -4028,6 +4034,9 @@ body {
   }
 
   .market-note {
+    width: 100%;
+    max-width: 100% !important;
+    box-sizing: border-box;
     padding: 0.5rem 0.75rem;
     font-size: 0.72rem;
     line-height: 1.35;
@@ -4040,8 +4049,11 @@ body {
      ============================================================ */
   .product-section {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 0.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
   }
 
   .product {
@@ -4054,6 +4066,10 @@ body {
     box-shadow: 0 2px 8px rgba(66, 48, 32, 0.04) !important;
     background: #ffffff !important;
     min-height: 0 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    overflow: hidden !important;
   }
 
   .product-header-badge {
@@ -4062,8 +4078,7 @@ body {
   }
 
   .produce-id {
-    font-size: 0.58rem !important;
-    padding: 1px 4px !important;
+    display: none !important;
   }
 
   .category-chip {
@@ -4142,16 +4157,22 @@ body {
 
   .preset-chip {
     flex: 1 1 0 !important;
-    padding: 3px 1px !important;
-    font-size: 0.62rem !important;
+    padding: 6px 2px !important;
+    min-height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.72rem !important;
     font-weight: 700 !important;
     text-align: center !important;
-    border-radius: 5px !important;
+    border-radius: 6px !important;
     min-width: 0 !important;
     border: 1px solid var(--line) !important;
     background: #ffffff !important;
     color: var(--brown-sub) !important;
     line-height: 1.2 !important;
+    cursor: pointer;
+    touch-action: manipulation;
   }
 
   .preset-chip.active {
@@ -4393,6 +4414,8 @@ body {
     flex-direction: column !important;
     padding: 1rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
     overflow: hidden !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
   }
 
   .cart-sidebar::before {
@@ -4421,6 +4444,8 @@ body {
     opacity: 0 !important;
     pointer-events: none !important;
     transition: opacity 0.28s ease !important;
+    touch-action: none !important;
+    overscroll-behavior: none !important;
   }
 
   .cart-drawer-backdrop.drawer-open {
@@ -4500,6 +4525,30 @@ body {
     padding: 0 !important;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
+    z-index: 1200 !important;
+  }
+
+  .toast {
+    z-index: 1300 !important;
+  }
+
+  /* HIDE FLOATING CART BAR WHEN DRAWER OR MODAL IS OPEN */
+  body.drawer-open #mobile-cart-bar,
+  body.modal-open #mobile-cart-bar,
+  body:has(.modal-overlay.open) #mobile-cart-bar,
+  body:has(.cart-sidebar.drawer-open) #mobile-cart-bar {
+    display: none !important;
+  }
+
+  /* LOCK HTML AND BODY COMPLETELY WHEN DRAWER OR MODAL IS OPEN (PREVENTS SWIPING/SCROLLING DOWN) */
+  html.drawer-open,
+  body.drawer-open,
+  html.modal-open,
+  body.modal-open {
+    overflow: hidden !important;
+    height: 100% !important;
+    touch-action: none !important;
+    overscroll-behavior: none !important;
   }
 
   .modal-card {
@@ -4639,8 +4688,9 @@ body {
     font-size: 0.88rem !important;
   }
   .preset-chip {
-    font-size: 0.58rem !important;
-    padding: 2px 1px !important;
+    font-size: 0.68rem !important;
+    min-height: 30px !important;
+    padding: 4px 2px !important;
   }
   .bnav-label {
     font-size: 0.62rem !important;

@@ -259,11 +259,8 @@ document.addEventListener("DOMContentLoaded", () => {
       discountRate = 0.20;
       savingLabel = "🌟 Borongan Hemat 20%";
     } else if (cleanWeight >= 2.0) {
-      discountRate = 0.15;
-      savingLabel = "🔥 Grosir Hemat 15%";
-    } else if (cleanWeight >= 1.0) {
       discountRate = 0.10;
-      savingLabel = "🏷️ Hemat 10% (Porsi Keluarga)";
+      savingLabel = "🏷️ Porsi Keluarga Hemat 10%";
     }
 
     const ratePerKg = Math.round(product.basePricePerKg * (1 - discountRate));
@@ -400,8 +397,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Kupon divalidasi via HASH SHA-256 (Hardening Client)
   // Hash dari "TEMANFARMER"
   const KUPON_HASH = "a12497e637e42764b41e7c6de1b07a8906d8e8841c7522a471a48a1ee74d61cd";
-  const DISKON_KUPON = 0.9;
-  let diskon = 0; // 0 = tanpa diskon, 0.9 = potong 90%
+  const DISKON_KUPON = 0.20;
+  let diskon = 0; // 0 = tanpa diskon, 0.20 = potong 20%
   let appliedCouponCode = "";
 
   async function hashSha256(text) {
@@ -654,20 +651,6 @@ document.addEventListener("DOMContentLoaded", () => {
      ============================================================ */
 
   function navigateTo(targetPage, scrollTarget = null) {
-    // Gatekeeper: Halaman Toko hanya terbuka jika sudah login Google & profil selesai
-    if (targetPage === "shop") {
-      if (!currentUser) {
-        openLoginModal();
-        showToast("Silakan masuk dengan akun Google untuk membuka Toko Buah & Sayur!");
-        return;
-      }
-      if (!currentUser.profileCompleted) {
-        openProfileSetupModal();
-        showToast("Lengkapi profil Pasar Pagi kamu untuk mulai berbelanja!");
-        return;
-      }
-    }
-
     currentPage = targetPage;
 
     if (targetPage === "shop") {
@@ -1049,17 +1032,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* TAMBAH BARANG KE KERANJANG BERDASARKAN TAKARAN */
   function addToCart(productId, customWeight = null) {
-    if (!currentUser) {
-      openLoginModal();
-      showToast("Silakan masuk dengan akun Google untuk mulai berbelanja!");
-      return;
-    }
-    if (!currentUser.profileCompleted) {
-      openProfileSetupModal();
-      showToast("Lengkapi profil Pasar Pagi kamu untuk mulai berbelanja!");
-      return;
-    }
-
     const product = products.find((item) => item.id == productId);
     if (!product) return;
 
@@ -1125,9 +1097,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hash === KUPON_HASH) {
       diskon = DISKON_KUPON;
       appliedCouponCode = code;
-      msg.innerHTML = `<i class="fas fa-check-circle"></i> Kupon <strong>${code}</strong> aktif! Diskon 90% berhasil dipasang.`;
+      msg.innerHTML = `<i class="fas fa-check-circle"></i> Kupon <strong>${code}</strong> aktif! Diskon 20% berhasil dipasang.`;
       msg.className = "coupon-msg ok";
-      showToast("🎉 Kupon Teman Petani aktif! Potongan 90% diterapkan.");
+      showToast("🎉 Kupon Teman Petani aktif! Potongan 20% diterapkan.");
     } else {
       diskon = 0;
       appliedCouponCode = "";
@@ -1835,11 +1807,13 @@ document.addEventListener("DOMContentLoaded", () => {
     selectBank(selectedBank || "bca");
 
     reviewModal.classList.add("open");
+    document.body.classList.add("modal-open");
     document.body.style.overflow = "hidden";
   }
 
   function closeReview() {
     reviewModal.classList.remove("open");
+    document.body.classList.remove("modal-open");
     document.body.style.overflow = "";
     stopQrisTimer();
   }
@@ -2124,7 +2098,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("cart-drawer-overlay");
     if (sidebar) sidebar.classList.add("drawer-open");
     if (overlay) overlay.classList.add("drawer-open");
+    document.body.classList.add("drawer-open");
+    document.documentElement.classList.add("drawer-open");
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
   }
 
   function closeCartDrawer() {
@@ -2132,7 +2109,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("cart-drawer-overlay");
     if (sidebar) sidebar.classList.remove("drawer-open");
     if (overlay) overlay.classList.remove("drawer-open");
+    document.body.classList.remove("drawer-open");
+    document.documentElement.classList.remove("drawer-open");
     document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+  }
+
+  // Kunci touch gesture agar keranjang tidak bisa di-swipe ke bawah
+  const cartSidebarEl = document.getElementById("cart-sidebar");
+  if (cartSidebarEl) {
+    cartSidebarEl.addEventListener("touchmove", (e) => {
+      // Hanya izinkan scroll jika jari berada di dalam daftar item belanja yang melebihi tinggi
+      if (!e.target.closest("#cart-details")) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+
+  const cartBackdropEl = document.getElementById("cart-drawer-overlay");
+  if (cartBackdropEl) {
+    cartBackdropEl.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+    }, { passive: false });
   }
 
   function scrollToCart() {
@@ -2254,15 +2252,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Klik tombol "Beli" di featured fruits/sayuran Beranda
+    // Klik tombol "Beli" di featured fruits/sayuran Beranda (tetap di beranda, feedback toast & badge)
     if (target.classList.contains("btn-buy-featured") || target.closest(".btn-buy-featured")) {
       const btn = target.classList.contains("btn-buy-featured") ? target : target.closest(".btn-buy-featured");
       const pId = Number(btn.dataset.productId);
       if (pId) {
         const p = products.find(prod => prod.id === pId);
         addToCart(pId);
-        navigateTo("shop", "cart");
-        showToast(`${p && p.type === 'sayur' ? '🥬 Sayuran' : '🍎 Buah'} ditambahkan ke keranjang!`);
+        showToast(`${p && p.type === 'sayur' ? '🥬' : '🍎'} ${p ? p.name : 'Produk'} ditambahkan ke keranjang!`);
       }
       return;
     }
