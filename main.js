@@ -847,7 +847,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       productCard.innerHTML = `
         <div class="product-header-badge">
-          <span class="produce-id">${product.produceId}</span>
+          <span class="produce-tag-pill">${product.type === "buah" ? "Buah Segar" : "Sayur Kebun"}</span>
         </div>
         
         <div class="product-image-container">
@@ -1181,18 +1181,12 @@ document.addEventListener("DOMContentLoaded", () => {
         avatar: payload.picture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80",
         phone: isExisting ? currentUser.phone : "",
         address: isExisting ? currentUser.address : "",
-        profileCompleted: isExisting ? (currentUser.profileCompleted ?? false) : false
+        profileCompleted: true
       });
 
       closeLoginModal();
-
-      if (!isExisting || !currentUser.profileCompleted) {
-        showToast(`Halo <strong>${escapeHtml(payload.name || 'Pelanggan')}</strong>! Silakan lengkapi profil toko Anda.`);
-        openProfileSetupModal();
-      } else {
-        navigateTo("shop");
-        showToast(`Selamat datang kembali, <strong>${escapeHtml(payload.name)}</strong>!`);
-      }
+      navigateTo("shop");
+      showToast(`Selamat datang, <strong>${escapeHtml(payload.name || 'Pelanggan')}</strong>!`);
     }
   }
 
@@ -1265,11 +1259,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const menuEmail = document.getElementById("menu-user-email");
       if (menuEmail) menuEmail.textContent = currentUser.email || "";
 
-      // Jika baru daftar Google dan belum melengkapi akun profil, langsung buka modal setup
       if (!currentUser.profileCompleted) {
-        setTimeout(() => {
-          openProfileSetupModal();
-        }, 250);
+        currentUser.profileCompleted = true;
+        localStorage.setItem("pasar_pagi_user", JSON.stringify(currentUser));
       }
     } else {
       if (guestEl) guestEl.style.display = "block";
