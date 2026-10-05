@@ -2187,45 +2187,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderProducts();
       return;
     }
-    // Navigasi Poster & Quick Shortcuts ke Buah
-    if (target.id === "btn-banner-shop-buah" || target.closest("#btn-banner-shop-buah") ||
-        target.id === "quick-link-buah" || target.closest("#quick-link-buah") ||
-        target.id === "btn-view-all-fruits") {
-      currentDepartment = "buah";
-      document.querySelectorAll(".dept-pill").forEach(p => p.classList.toggle("active", p.dataset.dept === "buah"));
-      navigateTo("shop");
-      renderProducts();
-      return;
-    }
-
-    // Navigasi Poster & Quick Shortcuts ke Sayuran
-    if (target.id === "btn-banner-shop-sayur" || target.closest("#btn-banner-shop-sayur") ||
-        target.id === "quick-link-sayur" || target.closest("#quick-link-sayur") ||
-        target.id === "btn-view-all-sayur") {
-      currentDepartment = "sayur";
-      document.querySelectorAll(".dept-pill").forEach(p => p.classList.toggle("active", p.dataset.dept === "sayur"));
-      navigateTo("shop");
-      renderProducts();
-      return;
-    }
-
-    // Navigasi Poster & Quick Shortcuts ke Katalog Lengkap
-    if (target.id === "btn-banner-shop-all" || target.closest("#btn-banner-shop-all") ||
-        target.id === "quick-link-all" || target.closest("#quick-link-all")) {
-      currentDepartment = "all";
-      document.querySelectorAll(".dept-pill").forEach(p => p.classList.toggle("active", p.dataset.dept === "all"));
-      navigateTo("shop");
-      renderProducts();
-      return;
-    }
-
-    // Quick Shortcut Voucher Promo
-    if (target.id === "quick-link-voucher" || target.closest("#quick-link-voucher")) {
-      const claimCouponBtn = document.getElementById("btn-claim-coupon");
-      if (claimCouponBtn) claimCouponBtn.click();
-      return;
-    }
-
     // Prev / Next Tombol Carousel Poster
     if (target.id === "banner-prev-btn" || target.closest("#banner-prev-btn")) {
       scrollBannerCarousel(-1);

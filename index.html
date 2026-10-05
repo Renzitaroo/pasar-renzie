@@ -116,10 +116,6 @@
             <span>Mulai Belanja Sayur & Buah</span>
             <i class="fas fa-arrow-right"></i>
           </button>
-          <button class="btn-hero-secondary" id="btn-claim-coupon">
-            <i class="fas fa-ticket-simple"></i>
-            <span>Klaim Voucher Diskon 20%</span>
-          </button>
         </div>
 
         <div class="welcome-perks">
@@ -172,7 +168,7 @@
         <div class="banner-carousel-track" id="banner-carousel-track" tabindex="0">
           
           <!-- SLIDE 1: POSTER BUAH-BUAHAN SEGAR -->
-          <div class="banner-poster-slide poster-slide-buah" data-dept="buah" id="slide-poster-buah">
+          <div class="banner-poster-slide poster-slide-buah" id="slide-poster-buah">
             <div class="poster-card-inner">
               <div class="poster-media">
                 <img src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=900&q=80" alt="Koleksi Buah Manis Petikan Fajar" class="poster-bg-img" loading="eager" />
@@ -192,19 +188,12 @@
                   <span class="ph-chip"><i class="fas fa-certificate"></i> Jaminan Manis</span>
                   <span class="ph-chip"><i class="fas fa-tags"></i> Diskon 20%</span>
                 </div>
-                <div class="poster-cta-row">
-                  <button class="btn-poster-action btn-action-buah" id="btn-banner-shop-buah">
-                    <span>Lihat Koleksi Buah Segar</span>
-                    <i class="fas fa-arrow-right"></i>
-                  </button>
-                  <span class="poster-cta-hint">10+ Pilihan Buah Tersedia</span>
-                </div>
               </div>
             </div>
           </div>
 
           <!-- SLIDE 2: POSTER SAYURAN SEGAR KEBUN -->
-          <div class="banner-poster-slide poster-slide-sayur" data-dept="sayur" id="slide-poster-sayur">
+          <div class="banner-poster-slide poster-slide-sayur" id="slide-poster-sayur">
             <div class="poster-card-inner">
               <div class="poster-media">
                 <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=900&q=80" alt="Sayuran Hijau Segar Petikan Subuh" class="poster-bg-img" loading="lazy" />
@@ -224,19 +213,12 @@
                   <span class="ph-chip"><i class="fas fa-droplet"></i> Segar Berembun</span>
                   <span class="ph-chip"><i class="fas fa-truck-fast"></i> Kirim Sebelum Siang</span>
                 </div>
-                <div class="poster-cta-row">
-                  <button class="btn-poster-action btn-action-sayur" id="btn-banner-shop-sayur">
-                    <span>Borong Sayuran Kebun</span>
-                    <i class="fas fa-arrow-right"></i>
-                  </button>
-                  <span class="poster-cta-hint">Petikan Fajar Hari Ini</span>
-                </div>
               </div>
             </div>
           </div>
 
           <!-- SLIDE 3: POSTER PAKET HEMAT & VOUCHER -->
-          <div class="banner-poster-slide poster-slide-paket" data-dept="all" id="slide-poster-paket">
+          <div class="banner-poster-slide poster-slide-paket" id="slide-poster-paket">
             <div class="poster-card-inner">
               <div class="poster-media">
                 <img src="https://images.unsplash.com/photo-1573246123716-6b1782bfc499?auto=format&fit=crop&w=900&q=80" alt="Paket Belanja Dapur Sehat" class="poster-bg-img" loading="lazy" />
@@ -256,13 +238,6 @@
                   <span class="ph-chip"><i class="fas fa-scale-balanced"></i> Timbangan Jujur</span>
                   <span class="ph-chip"><i class="fas fa-qrcode"></i> QRIS & COD</span>
                 </div>
-                <div class="poster-cta-row">
-                  <button class="btn-poster-action btn-action-paket" id="btn-banner-shop-all">
-                    <span>Mulai Belanja Lengkap</span>
-                    <i class="fas fa-basket-shopping"></i>
-                  </button>
-                  <span class="poster-cta-hint">Katalog Buah & Sayur Lengkap</span>
-                </div>
               </div>
             </div>
           </div>
@@ -279,38 +254,6 @@
         <button class="carousel-dot active" data-index="0" aria-label="Slide 1: Buah"></button>
         <button class="carousel-dot" data-index="1" aria-label="Slide 2: Sayur"></button>
         <button class="carousel-dot" data-index="2" aria-label="Slide 3: Paket Hemat"></button>
-      </div>
-
-      <!-- QUICK CATEGORY SHORTCUTS (TOKOPEDIA / SHOPEE STYLE) -->
-      <div class="home-quick-shortcuts">
-        <button class="quick-shortcut-card" data-dept="buah" id="quick-link-buah">
-          <span class="shortcut-icon-circle icon-buah">🍎</span>
-          <span class="shortcut-info">
-            <strong class="shortcut-title">Aneka Buah</strong>
-            <span class="shortcut-sub">Manis & Segar</span>
-          </span>
-        </button>
-        <button class="quick-shortcut-card" data-dept="sayur" id="quick-link-sayur">
-          <span class="shortcut-icon-circle icon-sayur">🥬</span>
-          <span class="shortcut-info">
-            <strong class="shortcut-title">Sayur Kebun</strong>
-            <span class="shortcut-sub">Petikan Subuh</span>
-          </span>
-        </button>
-        <button class="quick-shortcut-card" data-action="voucher" id="quick-link-voucher">
-          <span class="shortcut-icon-circle icon-promo">🏷️</span>
-          <span class="shortcut-info">
-            <strong class="shortcut-title">Voucher 20%</strong>
-            <span class="shortcut-sub">Klaim Promo</span>
-          </span>
-        </button>
-        <button class="quick-shortcut-card" data-dept="all" id="quick-link-all">
-          <span class="shortcut-icon-circle icon-all">🧺</span>
-          <span class="shortcut-info">
-            <strong class="shortcut-title">Semua Panen</strong>
-            <span class="shortcut-sub">Katalog Lengkap</span>
-          </span>
-        </button>
       </div>
     </section>
 
