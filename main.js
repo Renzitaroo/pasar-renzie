@@ -288,72 +288,28 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(0, Math.round((product.stockKg - used) * 10) / 10);
   }
 
-  // Render komponen slider model volume HP
-  function renderPhoneVolumeControl(productId, currentWeight) {
-    const percent = getVolumePercent(currentWeight);
-    const weightLabel = formatWeightLabel(currentWeight);
-
+  // Render selector takaran berat ringkas (Chips Only - Standar Sayurbox / Astro)
+  function renderWeightSelector(productId, currentWeight) {
     return `
-      <div class="phone-volume-section">
-        <div class="volume-header-row">
-          <span class="volume-label"><i class="fas fa-sliders"></i> Geser Takaran:</span>
-          <span class="volume-quick-weight v-header-weight-${productId}">${weightLabel}</span>
-        </div>
-
-        <div class="volume-control-wrap">
-          <button type="button" class="volume-step-btn volume-minus" data-product-id="${productId}" title="Kurangi Volume (-250g)">
-            <i class="fas fa-minus"></i>
-          </button>
-
-          <div class="volume-capsule-track">
-            <div class="volume-capsule-fill v-fill-${productId}" style="width: ${percent}%;"></div>
-            <div class="volume-capsule-content">
-              <i class="fas fa-scale-balanced"></i>
-              <span class="volume-capsule-text v-capsule-text-${productId}">${weightLabel}</span>
-            </div>
-            <input type="range" 
-                   class="volume-native-slider v-native-slider-${productId}" 
-                   data-product-id="${productId}" 
-                   min="0.25" 
-                   max="5.0" 
-                   step="0.25" 
-                   value="${currentWeight}" 
-                   aria-label="Geser takaran buah">
-          </div>
-
-          <button type="button" class="volume-step-btn volume-plus" data-product-id="${productId}" title="Tambah Volume (+250g)">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
-
-        <div class="volume-preset-chips">
-          <button type="button" class="preset-chip ${currentWeight === 0.5 ? 'active' : ''}" data-product-id="${productId}" data-weight="0.5">500 gr</button>
-          <button type="button" class="preset-chip ${currentWeight === 1.0 ? 'active' : ''}" data-product-id="${productId}" data-weight="1.0">1 kg</button>
-          <button type="button" class="preset-chip ${currentWeight === 2.0 ? 'active' : ''}" data-product-id="${productId}" data-weight="2.0">2 kg</button>
-          <button type="button" class="preset-chip ${currentWeight === 3.0 ? 'active' : ''}" data-product-id="${productId}" data-weight="3.0">3 kg</button>
-        </div>
+      <div class="weight-chip-row" role="group" aria-label="Pilih takaran berat">
+        <button type="button" class="preset-chip ${Math.abs(currentWeight - 0.5) < 0.05 ? 'active' : ''}" data-product-id="${productId}" data-weight="0.5">500 gr</button>
+        <button type="button" class="preset-chip ${Math.abs(currentWeight - 1.0) < 0.05 ? 'active' : ''}" data-product-id="${productId}" data-weight="1.0">1 kg</button>
+        <button type="button" class="preset-chip ${Math.abs(currentWeight - 2.0) < 0.05 ? 'active' : ''}" data-product-id="${productId}" data-weight="2.0">2 kg</button>
+        <button type="button" class="preset-chip ${Math.abs(currentWeight - 3.0) < 0.05 ? 'active' : ''}" data-product-id="${productId}" data-weight="3.0">3 kg</button>
       </div>
     `;
   }
+  const renderPhoneVolumeControl = renderWeightSelector;
 
-  // Update visual slider volume tanpa full-render (60 FPS smooth)
+  // Update visual takaran berat & harga tanpa full-render (60 FPS smooth)
   function updateCardVolumeUI(productId, newWeightKg) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
     const calc = calculatePriceForWeight(product, newWeightKg);
     selectedWeightKg[productId] = calc.weightKg;
-    const percent = getVolumePercent(calc.weightKg);
     const weightLabel = formatWeightLabel(calc.weightKg);
 
-    // Update fill level kapsul
-    document.querySelectorAll(`.v-fill-${productId}`).forEach(el => el.style.width = `${percent}%`);
-    // Update teks kapsul
-    document.querySelectorAll(`.v-capsule-text-${productId}`).forEach(el => el.textContent = weightLabel);
-    // Update badge berat header
-    document.querySelectorAll(`.v-header-weight-${productId}`).forEach(el => el.textContent = weightLabel);
-    // Update input range value
-    document.querySelectorAll(`.v-native-slider-${productId}`).forEach(el => el.value = calc.weightKg);
     // Update harga total
     document.querySelectorAll(`.v-price-${productId}`).forEach(el => el.textContent = formatMoney(calc.totalPrice));
     // Update satuan
@@ -739,7 +695,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <img src="${product.image}" alt="${product.name}" loading="lazy">
       </div>
       <div class="featured-body">
-        ${renderPhoneVolumeControl(product.id, calc.weightKg)}
         <div class="featured-meta">
           <h4 class="featured-title">${product.name}</h4>
           <div class="featured-price-wrap">
@@ -750,6 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="wholesale-saving-badge v-saving-${product.id} ${!calc.savingLabel ? 'empty' : ''}">
           ${calc.savingLabel ? `<i class="fas fa-tag"></i> ${calc.savingLabel}` : ""}
         </div>
+        ${renderWeightSelector(product.id, calc.weightKg)}
         <div class="featured-footer">
           <span class="featured-stock ${isOut ? 'text-danger' : ''}">${isOut ? 'Stok Habis' : `Sisa ${remainingKg} kg`}</span>
           <button class="btn-buy-featured" data-product-id="${product.id}" ${isOut ? 'disabled' : ''}>
@@ -856,8 +812,6 @@ document.addEventListener("DOMContentLoaded", () => {
           ${stokMenipis ? `<div class="low-stock-ribbon"><i class="fas fa-fire"></i> Tinggal ${remainingKg} kg!</div>` : ""}
         </div>
 
-        ${renderPhoneVolumeControl(product.id, calc.weightKg)}
-
         <div class="item-meta">
           <div class="meta-left">
             <h3 class="product-title">${product.name}</h3>
@@ -870,6 +824,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="price-unit v-unit-${product.id}">/ ${weightLabel}</span>
           </div>
         </div>
+
+        ${renderWeightSelector(product.id, calc.weightKg)}
 
         <div class="product-footer-row">
           <div class="stock-status ${remainingKg <= 0 ? 'stock-empty' : stokMenipis ? 'stock-warning' : 'stock-ok'}">
@@ -2212,29 +2168,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Step minus slider model volume HP (-0.25 kg / 250 gr)
-    if (target.classList.contains("volume-minus") || target.closest(".volume-minus")) {
-      const btn = target.classList.contains("volume-minus") ? target : target.closest(".volume-minus");
-      const pId = Number(btn.dataset.productId);
-      if (pId) {
-        const cur = selectedWeightKg[pId] || 1.0;
-        const next = Math.max(0.25, Math.round((cur - 0.25) * 4) / 4);
-        updateCardVolumeUI(pId, next);
-      }
-      return;
-    }
-
-    // Step plus slider model volume HP (+0.25 kg / 250 gr)
-    if (target.classList.contains("volume-plus") || target.closest(".volume-plus")) {
-      const btn = target.classList.contains("volume-plus") ? target : target.closest(".volume-plus");
-      const pId = Number(btn.dataset.productId);
-      if (pId) {
-        const cur = selectedWeightKg[pId] || 1.0;
-        const next = Math.min(5.0, Math.round((cur + 0.25) * 4) / 4);
-        updateCardVolumeUI(pId, next);
-      }
-      return;
-    }
 
     // Klik preset chip cepat (500 gr, 1 kg, 2 kg, 3 kg)
     if (target.classList.contains("preset-chip")) {
@@ -2768,16 +2701,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* EVENT INPUT: VOLUME SLIDER (DRAG MULUS REAL-TIME 60 FPS) */
-  document.addEventListener("input", (e) => {
-    if (e.target.classList.contains("volume-native-slider")) {
-      const pId = Number(e.target.dataset.productId);
-      const val = parseFloat(e.target.value);
-      if (pId && !isNaN(val)) {
-        updateCardVolumeUI(pId, val);
-      }
-    }
-  });
 
   /* EVENT INPUT: SEARCH & NOTE */
   searchInput.addEventListener("input", (e) => {
