@@ -155,30 +155,161 @@
       </div>
     </section>
 
-    <!-- HIGHLIGHT SECTION: BUAH & SAYUR FAVORIT HARI INI -->
-    <section class="home-highlights">
+    <!-- BANNER CAROUSEL POSTER PROMOSI (PILIHAN 2: SWIPEABLE POSTERS) -->
+    <section class="home-posters-showcase" aria-label="Promo Unggulan Buah dan Sayur">
       <div class="section-header-center">
-        <p class="section-eyebrow">pilihan terbaik hari ini</p>
-        <h3 class="section-title">Buah Favorit Pagi Ini</h3>
-        <p class="section-sub">Buah musiman dengan kualitas manis dan kematangan paling sempurna minggu ini.</p>
+        <p class="section-eyebrow">panen istimewa hari ini</p>
+        <h3 class="section-title">Inspirasi Segar Pagi Ini</h3>
+        <p class="section-sub">Geser poster untuk menemukan koleksi buah manis pilihan & sayuran petikan subuh terbaik.</p>
       </div>
 
-      <div class="featured-fruits-grid" id="home-featured-grid"></div>
+      <!-- CAROUSEL WRAPPER WITH ARROWS & TRACK -->
+      <div class="banner-carousel-container">
+        <button class="carousel-nav-btn prev-btn" id="banner-prev-btn" aria-label="Poster Sebelumnya">
+          <i class="fas fa-chevron-left"></i>
+        </button>
 
-      <!-- HIGHLIGHT SAYURAN SEGAR -->
-      <div class="section-header-center section-header-sayur">
-        <p class="section-eyebrow">panen segar kebun mitra</p>
-        <h3 class="section-title">Sayuran Segar Petikan Fajar</h3>
-        <p class="section-sub">Sayur hijau renyah, umbi gurih, dan bumbu dapur alami tanpa pestisida berbahaya.</p>
+        <div class="banner-carousel-track" id="banner-carousel-track" tabindex="0">
+          
+          <!-- SLIDE 1: POSTER BUAH-BUAHAN SEGAR -->
+          <div class="banner-poster-slide poster-slide-buah" data-dept="buah" id="slide-poster-buah">
+            <div class="poster-card-inner">
+              <div class="poster-media">
+                <img src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=900&q=80" alt="Koleksi Buah Manis Petikan Fajar" class="poster-bg-img" loading="eager" />
+                <div class="poster-overlay-gradient buah-gradient"></div>
+              </div>
+              <div class="poster-content">
+                <div class="poster-badge">
+                  <i class="fas fa-crown"></i>
+                  <span>Koleksi Buah Pilihan • Grade A</span>
+                </div>
+                <h4 class="poster-title">Festival Buah Manis Nusantara</h4>
+                <p class="poster-subtitle">
+                  Apel renyah, anggur manis merah, stroberi berembun & mangga ranum dipetik di kematangan sempurna langsung dari kebun mitra.
+                </p>
+                <div class="poster-highlights">
+                  <span class="ph-chip"><i class="fas fa-sun"></i> Manis Alami</span>
+                  <span class="ph-chip"><i class="fas fa-certificate"></i> Jaminan Manis</span>
+                  <span class="ph-chip"><i class="fas fa-tags"></i> Diskon 20%</span>
+                </div>
+                <div class="poster-cta-row">
+                  <button class="btn-poster-action btn-action-buah" id="btn-banner-shop-buah">
+                    <span>Lihat Koleksi Buah Segar</span>
+                    <i class="fas fa-arrow-right"></i>
+                  </button>
+                  <span class="poster-cta-hint">10+ Pilihan Buah Tersedia</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 2: POSTER SAYURAN SEGAR KEBUN -->
+          <div class="banner-poster-slide poster-slide-sayur" data-dept="sayur" id="slide-poster-sayur">
+            <div class="poster-card-inner">
+              <div class="poster-media">
+                <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=900&q=80" alt="Sayuran Hijau Segar Petikan Subuh" class="poster-bg-img" loading="lazy" />
+                <div class="poster-overlay-gradient sayur-gradient"></div>
+              </div>
+              <div class="poster-content">
+                <div class="poster-badge">
+                  <i class="fas fa-leaf"></i>
+                  <span>Panen Jam 05.00 Pagi • Tanpa Pestisida</span>
+                </div>
+                <h4 class="poster-title">Sayuran Hijau Segar Petikan Subuh</h4>
+                <p class="poster-subtitle">
+                  Bayam renyah, brokoli segar, dan wortel manis dataran tinggi. Garansi ganti baru 100% bila sayuran layu di perjalanan!
+                </p>
+                <div class="poster-highlights">
+                  <span class="ph-chip"><i class="fas fa-shield-heart"></i> Garansi Anti-Layu</span>
+                  <span class="ph-chip"><i class="fas fa-droplet"></i> Segar Berembun</span>
+                  <span class="ph-chip"><i class="fas fa-truck-fast"></i> Kirim Sebelum Siang</span>
+                </div>
+                <div class="poster-cta-row">
+                  <button class="btn-poster-action btn-action-sayur" id="btn-banner-shop-sayur">
+                    <span>Borong Sayuran Kebun</span>
+                    <i class="fas fa-arrow-right"></i>
+                  </button>
+                  <span class="poster-cta-hint">Petikan Fajar Hari Ini</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 3: POSTER PAKET HEMAT & VOUCHER -->
+          <div class="banner-poster-slide poster-slide-paket" data-dept="all" id="slide-poster-paket">
+            <div class="poster-card-inner">
+              <div class="poster-media">
+                <img src="https://images.unsplash.com/photo-1573246123716-6b1782bfc499?auto=format&fit=crop&w=900&q=80" alt="Paket Belanja Dapur Sehat" class="poster-bg-img" loading="lazy" />
+                <div class="poster-overlay-gradient paket-gradient"></div>
+              </div>
+              <div class="poster-content">
+                <div class="poster-badge">
+                  <i class="fas fa-ticket-simple"></i>
+                  <span>Voucher Diskon • Belanja Hemat</span>
+                </div>
+                <h4 class="poster-title">Belanja Dapur Lengkap Tanpa Becek</h4>
+                <p class="poster-subtitle">
+                  Penuhi kebutuhan vitamin dan serat harian keluarga dengan belanja praktis dari HP. Gunakan voucher diskon TEMANFARMER untuk potongan 20%!
+                </p>
+                <div class="poster-highlights">
+                  <span class="ph-chip"><i class="fas fa-gift"></i> Diskon 20%</span>
+                  <span class="ph-chip"><i class="fas fa-scale-balanced"></i> Timbangan Jujur</span>
+                  <span class="ph-chip"><i class="fas fa-qrcode"></i> QRIS & COD</span>
+                </div>
+                <div class="poster-cta-row">
+                  <button class="btn-poster-action btn-action-paket" id="btn-banner-shop-all">
+                    <span>Mulai Belanja Lengkap</span>
+                    <i class="fas fa-basket-shopping"></i>
+                  </button>
+                  <span class="poster-cta-hint">Katalog Buah & Sayur Lengkap</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="carousel-nav-btn next-btn" id="banner-next-btn" aria-label="Poster Berikutnya">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
 
-      <div class="featured-fruits-grid featured-sayur-grid" id="home-featured-sayur-grid"></div>
+      <!-- CAROUSEL INDICATORS -->
+      <div class="banner-carousel-indicators" id="banner-indicators">
+        <button class="carousel-dot active" data-index="0" aria-label="Slide 1: Buah"></button>
+        <button class="carousel-dot" data-index="1" aria-label="Slide 2: Sayur"></button>
+        <button class="carousel-dot" data-index="2" aria-label="Slide 3: Paket Hemat"></button>
+      </div>
 
-      <div class="home-bottom-cta">
-        <p>Ingin melihat seluruh koleksi buah dan sayuran segar kami?</p>
-        <button class="btn-view-all-shop" id="btn-view-all-fruits">
-          <span>Buka Toko Buah & Sayur Lengkap</span>
-          <i class="fas fa-basket-shopping"></i>
+      <!-- QUICK CATEGORY SHORTCUTS (TOKOPEDIA / SHOPEE STYLE) -->
+      <div class="home-quick-shortcuts">
+        <button class="quick-shortcut-card" data-dept="buah" id="quick-link-buah">
+          <span class="shortcut-icon-circle icon-buah">🍎</span>
+          <span class="shortcut-info">
+            <strong class="shortcut-title">Aneka Buah</strong>
+            <span class="shortcut-sub">Manis & Segar</span>
+          </span>
+        </button>
+        <button class="quick-shortcut-card" data-dept="sayur" id="quick-link-sayur">
+          <span class="shortcut-icon-circle icon-sayur">🥬</span>
+          <span class="shortcut-info">
+            <strong class="shortcut-title">Sayur Kebun</strong>
+            <span class="shortcut-sub">Petikan Subuh</span>
+          </span>
+        </button>
+        <button class="quick-shortcut-card" data-action="voucher" id="quick-link-voucher">
+          <span class="shortcut-icon-circle icon-promo">🏷️</span>
+          <span class="shortcut-info">
+            <strong class="shortcut-title">Voucher 20%</strong>
+            <span class="shortcut-sub">Klaim Promo</span>
+          </span>
+        </button>
+        <button class="quick-shortcut-card" data-dept="all" id="quick-link-all">
+          <span class="shortcut-icon-circle icon-all">🧺</span>
+          <span class="shortcut-info">
+            <strong class="shortcut-title">Semua Panen</strong>
+            <span class="shortcut-sub">Katalog Lengkap</span>
+          </span>
         </button>
       </div>
     </section>

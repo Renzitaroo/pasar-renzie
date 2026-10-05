@@ -2187,18 +2187,59 @@ document.addEventListener("DOMContentLoaded", () => {
       renderProducts();
       return;
     }
-    if (target.id === "btn-view-all-fruits") {
+    // Navigasi Poster & Quick Shortcuts ke Buah
+    if (target.id === "btn-banner-shop-buah" || target.closest("#btn-banner-shop-buah") ||
+        target.id === "quick-link-buah" || target.closest("#quick-link-buah") ||
+        target.id === "btn-view-all-fruits") {
       currentDepartment = "buah";
       document.querySelectorAll(".dept-pill").forEach(p => p.classList.toggle("active", p.dataset.dept === "buah"));
       navigateTo("shop");
       renderProducts();
       return;
     }
-    if (target.id === "btn-view-all-sayur") {
+
+    // Navigasi Poster & Quick Shortcuts ke Sayuran
+    if (target.id === "btn-banner-shop-sayur" || target.closest("#btn-banner-shop-sayur") ||
+        target.id === "quick-link-sayur" || target.closest("#quick-link-sayur") ||
+        target.id === "btn-view-all-sayur") {
       currentDepartment = "sayur";
       document.querySelectorAll(".dept-pill").forEach(p => p.classList.toggle("active", p.dataset.dept === "sayur"));
       navigateTo("shop");
       renderProducts();
+      return;
+    }
+
+    // Navigasi Poster & Quick Shortcuts ke Katalog Lengkap
+    if (target.id === "btn-banner-shop-all" || target.closest("#btn-banner-shop-all") ||
+        target.id === "quick-link-all" || target.closest("#quick-link-all")) {
+      currentDepartment = "all";
+      document.querySelectorAll(".dept-pill").forEach(p => p.classList.toggle("active", p.dataset.dept === "all"));
+      navigateTo("shop");
+      renderProducts();
+      return;
+    }
+
+    // Quick Shortcut Voucher Promo
+    if (target.id === "quick-link-voucher" || target.closest("#quick-link-voucher")) {
+      const claimCouponBtn = document.getElementById("btn-claim-coupon");
+      if (claimCouponBtn) claimCouponBtn.click();
+      return;
+    }
+
+    // Prev / Next Tombol Carousel Poster
+    if (target.id === "banner-prev-btn" || target.closest("#banner-prev-btn")) {
+      scrollBannerCarousel(-1);
+      return;
+    }
+    if (target.id === "banner-next-btn" || target.closest("#banner-next-btn")) {
+      scrollBannerCarousel(1);
+      return;
+    }
+
+    // Klik Indikator Dot Carousel Poster
+    if (target.classList.contains("carousel-dot")) {
+      const idx = Number(target.dataset.index) || 0;
+      scrollBannerCarouselToIndex(idx);
       return;
     }
     if (target.id === "btn-shop-back-home") {
@@ -2837,6 +2878,81 @@ document.addEventListener("DOMContentLoaded", () => {
       navigateTo("home");
     }
   });
+
+  /* ============================================================
+     BANNER CAROUSEL POSTER CONTROLLER (PILIHAN 2)
+     ============================================================ */
+  const bannerCarouselTrack = document.getElementById("banner-carousel-track");
+  const bannerIndicators = document.querySelectorAll("#banner-indicators .carousel-dot");
+  let carouselAutoPlayTimer = null;
+
+  function updateCarouselActiveDot() {
+    if (!bannerCarouselTrack || bannerIndicators.length === 0) return;
+    const scrollLeft = bannerCarouselTrack.scrollLeft;
+    const slides = bannerCarouselTrack.querySelectorAll(".banner-poster-slide");
+    if (!slides.length) return;
+    const slideWidth = slides[0].offsetWidth + 16;
+    const activeIndex = Math.min(Math.max(0, Math.round(scrollLeft / slideWidth)), bannerIndicators.length - 1);
+    bannerIndicators.forEach((dot, idx) => {
+      dot.classList.toggle("active", idx === activeIndex);
+    });
+  }
+
+  function scrollBannerCarousel(direction) {
+    if (!bannerCarouselTrack) return;
+    const slides = bannerCarouselTrack.querySelectorAll(".banner-poster-slide");
+    if (!slides.length) return;
+    const slideWidth = slides[0].offsetWidth + 16;
+    bannerCarouselTrack.scrollBy({ left: direction * slideWidth, behavior: "smooth" });
+  }
+
+  function scrollBannerCarouselToIndex(index) {
+    if (!bannerCarouselTrack) return;
+    const slides = bannerCarouselTrack.querySelectorAll(".banner-poster-slide");
+    if (!slides[index]) return;
+    const targetScroll = slides[index].offsetLeft - bannerCarouselTrack.offsetLeft;
+    bannerCarouselTrack.scrollTo({ left: targetScroll, behavior: "smooth" });
+  }
+
+  function startCarouselAutoPlay() {
+    stopCarouselAutoPlay();
+    carouselAutoPlayTimer = setInterval(() => {
+      if (!bannerCarouselTrack || currentPage !== "home") return;
+      const slides = bannerCarouselTrack.querySelectorAll(".banner-poster-slide");
+      if (!slides.length) return;
+      const slideWidth = slides[0].offsetWidth + 16;
+      const maxScroll = bannerCarouselTrack.scrollWidth - bannerCarouselTrack.clientWidth;
+      if (bannerCarouselTrack.scrollLeft >= maxScroll - 20) {
+        bannerCarouselTrack.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        bannerCarouselTrack.scrollBy({ left: slideWidth, behavior: "smooth" });
+      }
+    }, 5500);
+  }
+
+  function stopCarouselAutoPlay() {
+    if (carouselAutoPlayTimer) {
+      clearInterval(carouselAutoPlayTimer);
+      carouselAutoPlayTimer = null;
+    }
+  }
+
+  if (bannerCarouselTrack) {
+    let scrollRaf = null;
+    bannerCarouselTrack.addEventListener("scroll", () => {
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = requestAnimationFrame(updateCarouselActiveDot);
+    }, { passive: true });
+
+    bannerCarouselTrack.addEventListener("mouseenter", stopCarouselAutoPlay);
+    bannerCarouselTrack.addEventListener("mouseleave", startCarouselAutoPlay);
+    bannerCarouselTrack.addEventListener("touchstart", stopCarouselAutoPlay, { passive: true });
+    bannerCarouselTrack.addEventListener("touchend", () => {
+      setTimeout(startCarouselAutoPlay, 3000);
+    }, { passive: true });
+
+    startCarouselAutoPlay();
+  }
 
   /* INISIALISASI AWAL APLIKASI */
   // Inisialisasi Auth & Pembayaran
