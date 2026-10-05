@@ -2114,7 +2114,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const target = event.target.closest("button, .perk-coupon, .dept-pill, .payment-option, #clear-search, #reset-filter-btn, #brand-logo, .preset-chip, .volume-step-btn");
+    const target = event.target.closest("button, #mobile-cart-bar, .perk-coupon, .dept-pill, .payment-option, #clear-search, #reset-filter-btn, #brand-logo, .preset-chip");
     if (!target) return;
 
     // Tutup Drawer Keranjang Mobile
