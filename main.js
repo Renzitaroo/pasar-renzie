@@ -1080,7 +1080,7 @@ document.addEventListener("DOMContentLoaded", () => {
      ============================================================ */
 
   function initGoogleAuth() {
-    const clientId = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_GOOGLE_CLIENT_ID) || "89040021867-5ofg2iqgp2fa53t1v2ad3mpm1dec1rv2.apps.googleusercontent.com";
+    const clientId = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_GOOGLE_CLIENT_ID) || "214526431628-vl4u0af2voomkef0rb3hms20l4go8qpm.apps.googleusercontent.com";
     const realGisWrapper = document.getElementById("google-gis-real-wrapper");
     const realGisTarget = document.getElementById("google-gis-button-target");
     const actionBtn = document.getElementById("btn-google-official-action");
